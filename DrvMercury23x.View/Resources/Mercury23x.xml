@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DevTemplate Name="Меркурий236" readparam="14h" multicast="true" info="true" readStatus="true" SyncTime="true" halfArchStat="20" ArchMask="">
+  <SndGroups>
+    <SndRequest Name="Мощность P" Active="true" Bit="0">
+      <value name="Сумм (Вт)" code="Psumm" active="true" range="1" />
+      <value name="L1   (Вт)" code="P_L1" active="true" range="1" />
+      <value name="L2   (Вт)" code="P_L2" active="true" range="1" />
+      <value name="L3   (Вт)" code="P_L3" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Мощность Q" Active="true" Bit="1">
+      <value name="Сумм (вар)" code="Qsumm" active="true" range="1" />
+      <value name="L1   (вар)" code="Q_L1" active="true" range="1" />
+      <value name="L2   (вар)" code="Q_L2" active="true" range="1" />
+      <value name="L3   (вар)" code="Q_L3" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Мощность S" Active="true" Bit="2">
+      <value name="Сумм (ВА)" code="Ssumm" active="true" range="1" />
+      <value name="L1  (ВА)" code="S_L1" active="true" range="1" />
+      <value name="L2  (ВА)" code="S_L2" active="true" range="1" />
+      <value name="L3  (ВА)" code="S_L3" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="COSf" Active="true" Bit="3">
+      <value name="Сумм" code="Cossumm" active="true" range="1" />
+      <value name="L1" code="Cos_L1" active="true" range="1" />
+      <value name="L2" code="Cos_L2" active="true" range="1" />
+      <value name="L3" code="Cos_L3" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Напряжение" Active="true" Bit="4">
+      <value name="L1 (В)" code="U_L1" active="true" range="1" />
+      <value name="L2 (В)" code="U_L2" active="true" range="1" />
+      <value name="L3 (В)" code="U_L3" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Ток" Active="true" Bit="5">
+      <value name="L1 (А)" code="Cur_L1" active="true" range="1" />
+      <value name="L2 (А)" code="Cur_L2" active="true" range="1" />
+      <value name="L3 (А)" code="Cur_L3" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Угол м-ду ф." Active="false" Bit="6">
+      <value name="L1-L2" code="Corn_L12" active="true" range="1" />
+      <value name="L1-L3" code="Corn_L13" active="true" range="1" />
+      <value name="L2-L3" code="Corn_L23" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Частота" Active="true" Bit="7">
+      <value name="(Гц)" code="Freq" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="E от сброса" Active="true" Bit="8">
+      <value name="Сумма А+,  (кВт*ч)" code="Ereset_A+" active="true" range="1" />
+      <value name="Сумма А-,  (кВт*ч)" code="Ereset_A-" active="false" range="1" />
+      <value name="Сумма R+,  (кВт*ч)" code="Ereset_R+" active="true" range="1" />
+      <value name="Сумма R-,  (кВт*ч)" code="Ereset_R-" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Тариф 1" Active="true" Bit="9">
+      <value name="А+,  (кВт*ч)" code="tarif_1A+" active="true" range="1" />
+      <value name="А-,  (кВт*ч)" code="tarif_1A-" active="false" range="1" />
+      <value name="R+,  (кВт*ч)" code="tarif_1R+" active="true" range="1" />
+      <value name="R-,  (кВт*ч)" code="tarif_1R-" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Тариф 2" Active="true" Bit="10">
+      <value name="А+,  (кВт*ч)" code="tarif_2A+" active="true" range="1" />
+      <value name="А-,  (кВт*ч)" code="tarif_2A-" active="false" range="1" />
+      <value name="R+,  (кВт*ч)" code="tarif_2R+" active="true" range="1" />
+      <value name="R-,  (кВт*ч)" code="tarif_2R-" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Тариф 3" Active="false" Bit="11">
+      <value name="А+,  (кВт*ч)" code="tarif_3A+" active="true" range="1" />
+      <value name="А-,  (кВт*ч)" code="tarif_3A-" active="false" range="1" />
+      <value name="R+,  (кВт*ч)" code="tarif_3R+" active="true" range="1" />
+      <value name="R-,  (кВт*ч)" code="tarif_3R-" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Тариф 4" Active="false" Bit="12">
+      <value name="А+,  (кВт*ч)" code="tarif_4A+" active="true" range="1" />
+      <value name="А-,  (кВт*ч)" code="tarif_4A-" active="false" range="1" />
+      <value name="R+,  (кВт*ч)" code="tarif_4R+" active="true" range="1" />
+      <value name="R-,  (кВт*ч)" code="tarif_4R-" active="false" range="1" />
+    </SndRequest>
+    <SndRequest Name="Сумма А+" Active="true" Bit="13">
+      <value name="(L1), (кВт*ч)" code="Summ_L1A+" active="true" range="1" />
+      <value name="(L2), (кВт*ч)" code="Summ_L2A+" active="true" range="1" />
+      <value name="(L3), (кВт*ч)" code="Summ_L3A+" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Тариф 1А+" Active="true" Bit="14">
+      <value name="(L1), (кВт*ч)" code="tarif_1L1A+" active="true" range="1" />
+      <value name="(L2), (кВт*ч)" code="tarif_1L2A+" active="true" range="1" />
+      <value name="(L3), (кВт*ч)" code="tarif_1L3A+" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Тариф 2А+" Active="true" Bit="15">
+      <value name="(L1), (кВт*ч)" code="tarif_2L1A+" active="true" range="1" />
+      <value name="(L2), (кВт*ч)" code="tarif_2L2A+" active="true" range="1" />
+      <value name="(L3), (кВт*ч)" code="tarif_2L3A+" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Тариф 3А+" Active="false" Bit="16">
+      <value name="(L1), (кВт*ч)" code="tarif_3L1A+" active="true" range="1" />
+      <value name="(L2), (кВт*ч)" code="tarif_3L2A+" active="true" range="1" />
+      <value name="(L3), (кВт*ч)" code="tarif_3L3A+" active="true" range="1" />
+    </SndRequest>
+    <SndRequest Name="Тариф 4А+" Active="false" Bit="17">
+      <value name="(L1), (кВт*ч)" code="tarif_4L1A+" active="true" range="1" />
+      <value name="(L2), (кВт*ч)" code="tarif_4L2A+" active="true" range="1" />
+      <value name="(L3), (кВт*ч)" code="tarif_4L3A+" active="true" range="1" />
+    </SndRequest>
+  </SndGroups>
+  <ProfileGroups>
+    <PowerProfile Name="Профиль ср. мощностей" Active="true" Range="period" Energy="0">
+      <value name="P+ (Вт)" code="AverageP+" active="true" range="1000" />
+      <value name="P- (Вт)" code="AverageP-" active="true" range="-1000" />
+      <value name="Q+ (вар)" code="AverageQ+" active="true" range="1000" />
+      <value name="Q- (вар)" code="AverageQ-" active="true" range="-1000" />
+    </PowerProfile>
+  </ProfileGroups>
+  <CmdGroups>
+    <CmdGroup Name="SyncTime4min" Active="true" Code="100" Mode="0" Cmd="03" Par="0D" Data="002610" inCnt="4" />
+    <CmdGroup Name="WriteTime" Active="true" Code="101" Mode="2" Cmd="03" Par="0C" Data="0001010219052001" inCnt="4" />
+    <CmdGroup Name="ReadTime" Active="true" Code="102" Mode="0" Cmd="04" Par="00" Data="" inCnt="11" />
+    <CmdGroup Name="ReadLastTime" Active="true" Code="103" Mode="0" Cmd="04" Par="02" Data="FF" inCnt="16" />
+    <CmdGroup Name="ReadWordStatus" Active="true" Code="104" Mode="0" Cmd="04" Par="14" Data="FF" inCnt="16" />
+  </CmdGroups>
+</DevTemplate>
