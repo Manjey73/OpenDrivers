@@ -1,0 +1,38 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32414.318
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrvDanfossECL.Logic", "DrvDanfossECL.Logic\DrvDanfossECL.Logic.csproj", "{F286959D-A589-4D41-8E15-36BCB0439E38}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrvDanfossECL.View", "DrvDanfossECL.View\DrvDanfossECL.View.csproj", "{C52ED1C3-3A8F-4626-B1A6-F10E8F6A7A85}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DrvDanfossECL.Shared", "DrvDanfossECL.Shared\DrvDanfossECL.Shared.shproj", "{91A083F2-91DF-48D2-AAB7-DCB022CE42BB}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DrvDanfossECL.Shared\DrvDanfossECL.Shared.projitems*{91a083f2-91df-48d2-aab7-dcb022ce42bb}*SharedItemsImports = 13
+		DrvDanfossECL.Shared\DrvDanfossECL.Shared.projitems*{c52ed1c3-3a8f-4626-b1a6-f10e8f6a7a85}*SharedItemsImports = 5
+		DrvDanfossECL.Shared\DrvDanfossECL.Shared.projitems*{f286959d-a589-4d41-8e15-36bcb0439e38}*SharedItemsImports = 5
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F286959D-A589-4D41-8E15-36BCB0439E38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F286959D-A589-4D41-8E15-36BCB0439E38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F286959D-A589-4D41-8E15-36BCB0439E38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F286959D-A589-4D41-8E15-36BCB0439E38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C52ED1C3-3A8F-4626-B1A6-F10E8F6A7A85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C52ED1C3-3A8F-4626-B1A6-F10E8F6A7A85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C52ED1C3-3A8F-4626-B1A6-F10E8F6A7A85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C52ED1C3-3A8F-4626-B1A6-F10E8F6A7A85}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {25590F72-5B40-44B5-9F52-6E00469CF1AF}
+	EndGlobalSection
+EndGlobal
