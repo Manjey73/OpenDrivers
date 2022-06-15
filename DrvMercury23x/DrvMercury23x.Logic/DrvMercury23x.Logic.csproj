@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+	<Version>6.0.0</Version>
+  </PropertyGroup>
+
+  <Import Project="..\DrvMercury23x.Shared\DrvMercury23x.Shared.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <Reference Include="ScadaCommCommon">
+      <HintPath>..\..\scada-v6-dll\ScadaCommCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommFunc">
+      <HintPath>..\..\scada-v6-dll\ScadaCommFunc.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommon">
+      <HintPath>..\..\scada-v6-dll\ScadaCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommon.Log">
+      <HintPath>..\..\scada-v6-dll\ScadaCommon.Log.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
