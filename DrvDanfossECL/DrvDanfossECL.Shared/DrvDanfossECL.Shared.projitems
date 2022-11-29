@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CnlPrototypeFactory.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DanfossECLOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DevTemplate.cs" />
   </ItemGroup>
 </Project>
