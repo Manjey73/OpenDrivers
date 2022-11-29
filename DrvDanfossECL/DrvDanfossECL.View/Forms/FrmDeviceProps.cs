@@ -8,18 +8,23 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
 {
     public partial class FrmDeviceProps : Form
     {
+        /// <summary>
+        /// Имя файла нового шаблона устройства
+        /// </summary>
+        private const string NewFileName = "DanfossECL_NewTemplate.xml";
+
         private readonly AppDirs appDirs;           // the application directories
         private readonly LineConfig lineConfig;     // the communication line configuration
         private DeviceConfig deviceConfig; // the device configuration // readonly
         private string errMsg = "";
-        string shortFileName;
+        private string FileName;
 
         // Интерфейс
         private DevTemplate devTemplate = new DevTemplate();
         private int rowIndex;
         private int newRowIndex;
         private BindingSource bsAll = new BindingSource();
-        private List<string> lFormat = new List<string> { "", "float", "byte", "syte", "int16", "temp" }; // fill the drop down items.. Выпадающий список для ячейки Format 
+        private List<string> lFormat = new List<string> {"sbyte", "int16", "temp" }; // fill the drop down items.. Выпадающий список для ячейки Format 
         // Интерфейс
 
         /// <summary>
@@ -29,27 +34,25 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         {
             InitializeComponent();
 
-            FormBorderStyle = FormBorderStyle.FixedSingle;  // Убираем возможность растяжения окна
-            MaximizeBox = false;                            // Скрываем кнопки увеличения и уменьшения окна
-            MinimizeBox = false;
+            devTemplate.Parameter.Add(new DevTemplate.Parameters()); // Создаем пустой класс для первой строки
 
-            devTemplate.CmdGroups.Add(new DevTemplate.CmdGroup()); // Создаем пустой класс для первой строки
-
-            bsAll.DataSource = devTemplate.CmdGroups; // 
+            bsAll.DataSource = devTemplate.Parameter; // 
             dgvCmd.DataSource = bsAll;
 
             // Настройки вида 
             dgvCmd.AutoGenerateColumns = false;
-            dgvCmd.Columns["MulSpecified"].Visible = false; // Скрыть столбец со служебными переменными
-            dgvCmd.Columns["DivSpecified"].Visible = false; // Скрыть столбец со служебными переменными
-            dgvCmd.Columns["Name"].Width = 140;
+            dgvCmd.Columns["min_valSpecified"].Visible = false; // Скрыть столбец со служебными переменными
+            dgvCmd.Columns["max_valSpecified"].Visible = false; // Скрыть столбец со служебными переменными
+            dgvCmd.Columns["MultiplierSpecified"].Visible = false; // Скрыть столбец со служебными переменными
+            dgvCmd.Columns["Code"].Width = 150;
+            dgvCmd.Columns["Name"].Width = 220;
             dgvCmd.Columns["Active"].Width = 56;
-            dgvCmd.Columns["Read"].Width = 56;
+            dgvCmd.Columns["Address"].Width = 60;
             dgvCmd.Columns["Write"].Width = 56;
-            dgvCmd.Columns["Parameter"].Width = 80;
-            dgvCmd.Columns["Format"].Width = 80;
-            dgvCmd.Columns["Mul"].Width = 80;
-            dgvCmd.Columns["Div"].Width = 80;
+            dgvCmd.Columns["min_val"].Width = 60;
+            dgvCmd.Columns["max_val"].Width = 60;
+            dgvCmd.Columns["Format"].Width = 70;
+            dgvCmd.Columns["Multiplier"].Width = 70;
 
             //События для DataGridView
             dgvCmd.CellMouseClick += new DataGridViewCellMouseEventHandler(dgvCmd_CellMouseClick);
@@ -67,10 +70,9 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         {
             if (!File.Exists(GetTemplatePath()))
             {
-                ScadaUiUtils.ShowError("Файл шаблона устройства не существует."); // ModbusDriverPhrases.TemplateNotExists
+                ScadaUiUtils.ShowError(Locale.IsRussian ? "Файл шаблона устройства не существует." : "The device template file does not exist.");
                 return false;
             }
-
             return true;
         }
 
@@ -96,13 +98,15 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         private void btnBrowseTemplate_Click(object sender, EventArgs e)
         {
             // show dialog to select template file
-            openFileDialog.InitialDirectory = appDirs.ConfigDir;
+            openFileDialog.InitialDirectory = appDirs.ConfigDir; // TEST
             openFileDialog.FileName = "";
 
             if (openFileDialog.ShowDialog() == DialogResult.OK &&
                 ValidateTemplatePath(openFileDialog.FileName, out string shortFileName))
             {
                 txtTemplateFileName.Text = shortFileName;
+                ControlsToConfig();
+                FileName = GetTemplatePath();
             }
             Load_Properties();
         }
@@ -112,11 +116,10 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         /// </summary>
         private void Load_Properties()
         {
-
             try
             {
-                devTemplate = FileFunc.LoadXml(typeof(DevTemplate), GetTemplatePath()) as DevTemplate; // При новой загрузке plcprojectinfo очищается
-                bsAll.DataSource = devTemplate.CmdGroups;
+                devTemplate = FileFunc.LoadXml(typeof(DevTemplate), GetTemplatePath()) as DevTemplate;
+                bsAll.DataSource = devTemplate.Parameter;
                 dgvCmd.DataSource = bsAll;
 
                 txtDevName.Text = devTemplate.Name;
@@ -127,10 +130,9 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
                 ScadaUiUtils.ShowError(errMsg);
                 txtTemplateFileName.Text = "";
             }
-            catch (Exception err)
+            catch // (Exception err)
             {
-                ScadaUiUtils.ShowError(err.ToString());
-                //richTextBox1.Text += $"Catch   {err}" + Environment.NewLine;
+                //ScadaUiUtils.ShowError(err.ToString());
             }
         }
 
@@ -146,7 +148,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             }
             else
             {
-                ScadaUiUtils.ShowError("Файл шаблона устройства должен располагаться внутри {0}", appDirs.ConfigDir); // ModbusDriverPhrases.ConfigDirRequired
+                ScadaUiUtils.ShowError(Locale.IsRussian ? "Файл шаблона устройства должен располагаться внутри {0}" : "The device template file should be located inside {0}", appDirs.ConfigDir);
                 shortFileName = "";
                 return false;
             }
@@ -168,18 +170,19 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
 
         private void FrmDeviceProps_Load(object sender, EventArgs e)
         {
+            // настройка элементов управления
+            openFileDialog.InitialDirectory = appDirs.ConfigDir;
+
             FormTranslator.Translate(this, GetType().FullName);
             openFileDialog.SetFilter(CommonPhrases.XmlFileFilter);
             saveFileDialog.SetFilter(CommonPhrases.XmlFileFilter);
 
-
             Text = string.Format(Text, deviceConfig.DeviceNum); // deviceConfig.DeviceNum
             ConfigToControls();
 
-
-            shortFileName = txtTemplateFileName == null ? "" : txtTemplateFileName.Text; // TEST
-            if (txtTemplateFileName.Text != "")
+            if (!string.IsNullOrEmpty(txtTemplateFileName.Text))
             {
+                FileName = GetTemplatePath();
                 Load_Properties();
             }
         }
@@ -189,7 +192,6 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         /// </summary>
         private void ControlsToConfig()
         {
-            //lineConfig.CustomOptions["TransMode"] = ((TransMode)cbTransMode.SelectedIndex).ToString();
             deviceConfig.PollingOptions.CmdLine = txtTemplateFileName.Text;
         }
 
@@ -198,19 +200,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         /// </summary>
         private void ConfigToControls()
         {
-            //cbTransMode.SelectedIndex = (int)lineConfig.CustomOptions.GetValueAsEnum("TransMode", TransMode.RTU);
             txtTemplateFileName.Text = deviceConfig.PollingOptions.CmdLine;
-        }
-
-        private void ButExt_Click(object sender, EventArgs e) // Тестовый пример вызова окна Custom Options
-        {
-            DanfossECLOptions options = new(deviceConfig.PollingOptions.CustomOptions);
-            FrmOptions frmOptions = new() { Options = options };
-
-            if (frmOptions.ShowDialog() == DialogResult.OK)
-            {
-                options.AddToOptionList(deviceConfig.PollingOptions.CustomOptions);
-            }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -221,10 +211,9 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
 
         private void btnSaveAs_Click(object sender, EventArgs e)
         {
+            saveFileDialog.InitialDirectory = appDirs.ConfigDir;
             // сохранение шаблона устройства в новый файл
             SaveChanges(sender == btnSaveAs);
-            txtTemplateFileName.Text = shortFileName;
-
         }
 
         ///// <summary>
@@ -233,18 +222,20 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         private bool SaveChanges(bool saveAs)
         {
             // определение имени файла
-            string newFileName = "";
+            string newFileName = txtTemplateFileName.Text;
 
-            if (saveAs || shortFileName == "")
+            if (saveAs || string.IsNullOrEmpty(FileName))
             {
+                saveFileDialog.FileName = string.IsNullOrEmpty(FileName) ? NewFileName : Path.GetFileName(FileName);
+
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
                     newFileName = saveFileDialog.FileName;
-                }
+                else
+                    return false; // при отказе записи
             }
             else
             {
-                newFileName = appDirs.ConfigDir + shortFileName;
+                newFileName = FileName;
             }
 
             if (newFileName == "")
@@ -256,8 +247,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
                 //сохранение шаблона устройства
                 if (Save(newFileName, out errMsg))
                 {
-                    var file = new FileInfo(newFileName);
-                    shortFileName = file.Name; // file.Name
+                    FileName = newFileName;
                     return true;
                 }
                 else
@@ -271,12 +261,17 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         /// <summary>
         /// Сохранить шаблон устройства
         /// </summary>
-        public bool Save(string filepath, out string errMsg)
+        public bool Save(string FileName, out string errMsg)
         {
+
             try
             {
-                FileFunc.SaveXml(devTemplate, filepath); // добавить сохранение в выбранный файл TEST
+                bool save = FileFunc.SaveXml(devTemplate, FileName); // добавить сохранение в выбранный файл TEST
                 errMsg = "";
+
+                if (save && ValidateTemplatePath(FileName, out string shortFileName))
+                    txtTemplateFileName.Text = shortFileName;
+
                 return true;
             }
             catch (Exception ex)
@@ -284,6 +279,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
                 errMsg = ex.Message;
                 return false;
             }
+
         }
 
         // -------------------------------------- Интерфейс ------------------------------
@@ -309,6 +305,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         {
             rowIndex = dgvCmd.CurrentCell.RowIndex;
         }
+
         private void dgvCmd_SelectionChanged(object sender, EventArgs e)
         {
             newRowIndex = dgvCmd.NewRowIndex;
@@ -319,12 +316,12 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             if (bsAll.Position == 0)
                 return;
 
-            var cmdGroup = devTemplate.CmdGroups[bsAll.Position];
-            devTemplate.CmdGroups.RemoveAt(bsAll.Position);
+            var cmdGroup = devTemplate.Parameter[bsAll.Position];
+            devTemplate.Parameter.RemoveAt(bsAll.Position);
 
             bsAll.MovePrevious();
             dgvCmd.ClearSelection();
-            devTemplate.CmdGroups.Insert(bsAll.Position, cmdGroup);
+            devTemplate.Parameter.Insert(bsAll.Position, cmdGroup);
             dgvCmd.Rows[bsAll.Position].Selected = true;
             rowIndex = bsAll.Position; // Корректируем параметр rowIndex
 
@@ -335,19 +332,19 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         {
             if (bsAll.Position + 1 == bsAll.Count) return;
 
-            var cmdGroup = devTemplate.CmdGroups[bsAll.Position];
-            devTemplate.CmdGroups.RemoveAt(bsAll.Position);
+            var cmdGroup = devTemplate.Parameter[bsAll.Position];
+            devTemplate.Parameter.RemoveAt(bsAll.Position);
 
             dgvCmd.ClearSelection();
             if (bsAll.Position + 1 == bsAll.Count)
             {
-                devTemplate.CmdGroups.Add(cmdGroup);
+                devTemplate.Parameter.Add(cmdGroup);
                 bsAll.MoveNext();
             }
             else
             {
                 bsAll.MoveNext();
-                devTemplate.CmdGroups.Insert(bsAll.Position, cmdGroup);
+                devTemplate.Parameter.Insert(bsAll.Position, cmdGroup);
             }
             dgvCmd.Rows[bsAll.Position].Selected = true;
 
@@ -381,7 +378,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             c.Style.BackColor = Color.White;
             c.DataSource = lFormat;
 
-            dgvCmd[6, e.RowIndex] = c;  // change the cell с индексом 6 (Format)
+            dgvCmd[7, e.RowIndex] = c;  // change the cell с индексом 7 (Format)
         }
         // -------------------------------------- Интерфейс ------------------------------
     }
