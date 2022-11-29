@@ -39,7 +39,6 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             this.dgvCmd = new System.Windows.Forms.DataGridView();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.ButExt = new System.Windows.Forms.Button();
             this.txtDevName = new System.Windows.Forms.TextBox();
             this.labDevName = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCmd)).BeginInit();
@@ -63,9 +62,9 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             this.btnMoveUpItem.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnMoveUpItem.Image = global::DrvDanfossECL.View.Properties.Resources.up;
-            this.btnMoveUpItem.Location = new System.Drawing.Point(352, 13);
+            this.btnMoveUpItem.Location = new System.Drawing.Point(352, 14);
             this.btnMoveUpItem.Name = "btnMoveUpItem";
-            this.btnMoveUpItem.Size = new System.Drawing.Size(23, 23);
+            this.btnMoveUpItem.Size = new System.Drawing.Size(23, 22);
             this.btnMoveUpItem.TabIndex = 5;
             this.btnMoveUpItem.UseVisualStyleBackColor = true;
             this.btnMoveUpItem.Click += new System.EventHandler(this.btnMoveUpItem_Click);
@@ -74,9 +73,9 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             this.btnMoveDownItem.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnMoveDownItem.Image = global::DrvDanfossECL.View.Properties.Resources.down;
-            this.btnMoveDownItem.Location = new System.Drawing.Point(381, 13);
+            this.btnMoveDownItem.Location = new System.Drawing.Point(381, 14);
             this.btnMoveDownItem.Name = "btnMoveDownItem";
-            this.btnMoveDownItem.Size = new System.Drawing.Size(23, 23);
+            this.btnMoveDownItem.Size = new System.Drawing.Size(23, 22);
             this.btnMoveDownItem.TabIndex = 6;
             this.btnMoveDownItem.UseVisualStyleBackColor = true;
             this.btnMoveDownItem.Click += new System.EventHandler(this.btnMoveDownItem_Click);
@@ -110,17 +109,22 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             // dgvCmd
             // 
+            this.dgvCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvCmd.BackgroundColor = System.Drawing.SystemColors.Window;
             this.dgvCmd.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvCmd.Location = new System.Drawing.Point(12, 42);
+            this.dgvCmd.Location = new System.Drawing.Point(12, 44);
             this.dgvCmd.Name = "dgvCmd";
+            this.dgvCmd.RowHeadersWidth = 51;
             this.dgvCmd.RowTemplate.Height = 25;
-            this.dgvCmd.Size = new System.Drawing.Size(773, 367);
+            this.dgvCmd.Size = new System.Drawing.Size(879, 379);
             this.dgvCmd.TabIndex = 11;
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(12, 415);
+            this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnOK.Location = new System.Drawing.Point(12, 428);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 12;
@@ -130,24 +134,14 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(93, 415);
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCancel.Location = new System.Drawing.Point(93, 428);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 13;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-            // 
-            // ButExt
-            // 
-            this.ButExt.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.ButExt.Image = global::DrvDanfossECL.View.Properties.Resources.options_extended;
-            this.ButExt.Location = new System.Drawing.Point(307, 14);
-            this.ButExt.Name = "ButExt";
-            this.ButExt.Size = new System.Drawing.Size(23, 23);
-            this.ButExt.TabIndex = 14;
-            this.ButExt.UseVisualStyleBackColor = true;
-            this.ButExt.Click += new System.EventHandler(this.ButExt_Click);
             // 
             // txtDevName
             // 
@@ -170,10 +164,9 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(795, 450);
+            this.ClientSize = new System.Drawing.Size(904, 461);
             this.Controls.Add(this.labDevName);
             this.Controls.Add(this.txtDevName);
-            this.Controls.Add(this.ButExt);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.dgvCmd);
@@ -183,6 +176,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             this.Controls.Add(this.btnMoveDownItem);
             this.Controls.Add(this.btnMoveUpItem);
             this.Controls.Add(this.btnBrowseTemplate);
+            this.MinimumSize = new System.Drawing.Size(800, 400);
             this.Name = "FrmDeviceProps";
             this.Text = "Device {0} Properties";
             this.Load += new System.EventHandler(this.FrmDeviceProps_Load);
@@ -205,7 +199,6 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         private DataGridView dgvCmd;
         private Button btnOK;
         private Button btnCancel;
-        private Button ButExt;
         private TextBox txtDevName;
         private Label labDevName;
     }
