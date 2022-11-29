@@ -3,8 +3,6 @@ using Scada.Comm.Devices;
 using Scada.Lang;
 using ScadaCommFunc;
 using Scada.Data.Const;
-using Scada.Forms.Forms;
-using System.Windows.Forms;
 using Scada.Comm.Drivers.DrvDanfossECL.View.Forms;
 
 namespace Scada.Comm.Drivers.DrvDanfossECL.View
@@ -28,8 +26,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View
         /// </summary>
         public override PollingOptions GetPollingOptions()
         {
-            PollingOptions pollingOptions = PollingOptions.CreateDefault();
-            new DanfossECLOptions().AddToOptionList(pollingOptions.CustomOptions);
+            PollingOptions pollingOptions = new PollingOptions(1000, 400); // Wait 400 ms задержка из документации, но возможно работает быстрее
             return pollingOptions;
         }
 
@@ -81,34 +78,30 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View
             {
                 channels.Clear(); // Очищаем список, так как код срабатывает при выборе КП при Создании каналов каждый раз...
 
-                if (devTemplate.CmdGroups.Count > 0) // Определить активные запросы объектов и записать в список индексы запросов для создания тегов
+                if (devTemplate.Parameter.Count > 0) // Определить активные запросы объектов и записать в список индексы запросов для создания тегов
                 {
-                    for (int sg = 0; sg < devTemplate.CmdGroups.Count; sg++)
+                    for (int sg = 0; sg < devTemplate.Parameter.Count; sg++)
                     {
-                        if (devTemplate.CmdGroups[sg].Active)
+                        if (devTemplate.Parameter[sg].Active)
                         {
-                            string format = string.IsNullOrEmpty(devTemplate.CmdGroups[sg].Format) ? "" : devTemplate.CmdGroups[sg].Format; // TEST List<string>
+                            string format = string.IsNullOrEmpty(devTemplate.Parameter[sg].Format) ? "sbyte" : devTemplate.Parameter[sg].Format; // TEST List<string>
                             int datatype = DataTypeID.Double;
                             int cnltype;
 
-                            if(devTemplate.CmdGroups[sg].Write != "" && devTemplate.CmdGroups[sg].Read != "")
+                            if(devTemplate.Parameter[sg].Write && devTemplate.Parameter[sg].Address != "")
                             {
                                 cnltype = CnlTypeID.InputOutput;
-                            }
-                            else if(devTemplate.CmdGroups[sg].Write != "" && devTemplate.CmdGroups[sg].Read == "")
-                            {
-                                cnltype = CnlTypeID.Output;
                             }
                             else
                             {
                                 cnltype = CnlTypeID.Input;
                             }
 
-                            channels.Add(devTemplate.CmdGroups[sg].Name,
+                            channels.Add(devTemplate.Parameter[sg].Name,
                             new CnlPrototypeFactory.ActiveChannel()
                             {
-                                Name = devTemplate.CmdGroups[sg].Name,
-                                Code = devTemplate.CmdGroups[sg].Code,
+                                Name = devTemplate.Parameter[sg].Name,
+                                Code = devTemplate.Parameter[sg].Code,
                                 CnlType = cnltype,
                                 DataType = datatype,
                                 format = format,
@@ -118,5 +111,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View
                 }
             }
         }
+
+
     }
 }
