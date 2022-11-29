@@ -3,9 +3,6 @@
 
 using Scada.Comm.Devices;
 using Scada.Data.Const;
-using ScadaCommFunc;
-//using System.Collections.Generic;
-//using System.Linq;
 
 namespace Scada.Comm.Drivers.DrvDanfossECL
 {
@@ -37,18 +34,16 @@ namespace Scada.Comm.Drivers.DrvDanfossECL
 
 
             foreach (var cnlprot in listCnl)
-                {
-                    group.AddCnlPrototype(cnlprot.Value.Code, cnlprot.Value.Name).Configure(cnl =>
+            {
+                group.AddCnlPrototype(cnlprot.Value.Code, cnlprot.Value.Name).Configure(cnl =>
                     {
                         cnl.CnlTypeID = cnlprot.Value.CnlType;
                         cnl.DataTypeID = cnlprot.Value.DataType;
-                        
-                        cnl.FormatCode = FormatCode.N2;
-                        if (cnlprot.Value.format == "hex") cnl.FormatCode = FormatCode.X8;
-                        else if (cnlprot.Value.format == "string") cnl.FormatCode = FormatCode.String; // Для команд, передающих строку HEX
+
+                        cnl.FormatCode = FormatCode.N0;
                     });
-                }
-                groups.Add(group);
+            }
+            groups.Add(group);
             return groups;
         }
 
