@@ -2,11 +2,9 @@ using Scada.Comm.Channels;
 using Scada.Comm.Config;
 using Scada.Comm.Devices;
 using Scada.Comm.Lang;
-using Scada.Data.Entities;
 using Scada.Data.Models;
 using Scada.Lang;
 using ScadaCommFunc;
-using System;
 using System.Diagnostics;
 
 namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
@@ -27,6 +25,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
         private bool high; // Переменная, указывающая какой байт адреса используется true - Address(high), false - Address(low)
         private bool writeEvenRam;
         private bool writeOnlyRam;
+        private bool writeMultiplier;
         private List<KeyValuePair<string, ActiveSignal>> listActive;
 
         private class ActiveSignal // Класс для списка активных команд
@@ -95,6 +94,8 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
             {
                 bool chk = string.IsNullOrEmpty(devTemplate.WriteEvenRAM) ? writeEvenRam = true : bool.TryParse(devTemplate.WriteEvenRAM, out writeEvenRam);
                 chk = string.IsNullOrEmpty(devTemplate.WriteOnlyRAM) ? writeOnlyRam = false : bool.TryParse(devTemplate.WriteOnlyRAM, out writeOnlyRam);
+                chk = string.IsNullOrEmpty(devTemplate.WriteMultiplier) ? writeMultiplier = false : bool.TryParse(devTemplate.WriteMultiplier, out writeMultiplier);
+
 
                 //Log.WriteLine($"WriteEvenRAM = {writeEvenRam} and {devTemplate.WriteEvenRAM}"); // TEST
 
@@ -123,8 +124,8 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
                                     uAddr = BitConverter.ToUInt16(bAddr, 0);
 
                                     // Проверка адреса на запись, независимо от выставленного параметра Write
-                                    // 16-bit value read-only (E30 - E41, E46 - E4D)
-                                    if (uAddr >= 0x0E30 && uAddr <= 0x0E4D)
+                                    // 16-bit value read-only (E30 - E41, E46 - E4D)    // и если адреса меньше E0F так же только чтение.
+                                    if (uAddr >= 0x0E30 && uAddr <= 0x0E4D)             //  || uAddr <= 0x0E0F
                                     {
                                         actSig.actComm.Write = false;
                                     }
@@ -367,42 +368,46 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
         {
             base.SendCommand(cmd);
             string cmdCode = cmd.CmdCode;
-
-            if (!string.IsNullOrEmpty(activReq[cmd.CmdCode].actComm.min_val) && !string.IsNullOrEmpty(activReq[cmd.CmdCode].actComm.max_val))
-            {
-                // Проверка на минимальные и максимальные значения
-                double minVal = SToDouble(activReq[cmd.CmdCode].actComm.min_val);
-                double maxVal = SToDouble(activReq[cmd.CmdCode].actComm.max_val);
-
-                if (cmd.CmdVal < minVal || cmd.CmdVal > maxVal)
-                {
-                    string error = Locale.IsRussian ?
-                        $"Ошибка: Значение команды находится вне диапазона ({(int)minVal}...{(int)maxVal})" :
-                        $"Error: The value of the command is out of range ({(int)minVal}...{(int)maxVal})";
-
-                    DeviceEvent MinMax = new DeviceEvent();
-                    MinMax.DeviceTag = DeviceTags[cmd.CmdCode];
-                    MinMax.CnlVal = cmd.CmdVal;
-                    MinMax.Descr = "Значение команды вне диапазона";
-                    MinMax.Text = $"{error}";
-                    MinMax.Ack = false;
-                    MinMax.TextFormat = EventTextFormat.CustomText;
-                    MinMax.Timestamp = DateTime.UtcNow;
-                    MinMax.CnlStat = 23;
-                    MinMax.CnlVal = cmd.CmdVal;
-
-                    DeviceData.EnqueueEvent(MinMax);
-
-                    Log.WriteLine(error);
-                    LastRequestOK = false;
-                    FinishCommand();
-                    return;
-                }
-            }
+            double cmdVal = cmd.CmdVal;
 
             if (activReq.ContainsKey(cmdCode) && activReq[cmdCode].actComm.Write) // Собственно проверяем есть ли  у нас переменная с таким кодом и позволяет ли она запись
             {
-                if (!double.IsNaN(cmd.CmdVal))
+                if (!string.IsNullOrEmpty(activReq[cmd.CmdCode].actComm.min_val) && !string.IsNullOrEmpty(activReq[cmd.CmdCode].actComm.max_val))
+                {
+                    // Проверка на минимальные и максимальные значения
+                    double minVal = SToDouble(activReq[cmd.CmdCode].actComm.min_val);
+                    double maxVal = SToDouble(activReq[cmd.CmdCode].actComm.max_val);
+
+                    // Если заполнено поле Multiplier, выполняем действие над результатом
+                    if (!string.IsNullOrEmpty(activReq[cmdCode].actComm.Multiplier) && writeMultiplier) cmdVal = cmdVal / SToDouble(activReq[cmdCode].actComm.Multiplier);
+
+                    if (cmdVal < minVal || cmdVal > maxVal)
+                    {
+                        string error = Locale.IsRussian ?
+                            $"Ошибка: Значение команды находится вне диапазона ({(int)minVal}...{(int)maxVal})" :
+                            $"Error: The value of the command is out of range ({(int)minVal}...{(int)maxVal})";
+
+                        DeviceEvent MinMax = new DeviceEvent();
+                        MinMax.DeviceTag = DeviceTags[cmd.CmdCode];
+                        MinMax.CnlVal = cmdVal;
+                        MinMax.Descr = "Значение команды вне диапазона";
+                        MinMax.Text = $"{error}";
+                        MinMax.Ack = false;
+                        MinMax.TextFormat = EventTextFormat.CustomText;
+                        MinMax.Timestamp = DateTime.UtcNow;
+                        MinMax.CnlStat = 23;
+                        MinMax.CnlVal = cmdVal;
+
+                        DeviceData.EnqueueEvent(MinMax);
+
+                        Log.WriteLine(error);
+                        LastRequestOK = false;
+                        FinishCommand();
+                        return;
+                    }
+                }
+
+                if (!double.IsNaN(cmdVal))
                 {
                     string cmdFormat = activReq[cmdCode].actComm.Format;
                     uAddr = activReq[cmdCode].Address; // Чтение адреса параметра
@@ -417,18 +422,18 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
                         if (uAddr > 0x00FF) // Предположительно RAM адреса, доступные для записи, если в пределах 0x00FF то соответственно ROM адреса // 0x0E72 && uAddr <= 0x0E78
                         {
                             addrUshort = (ushort)(uAddr | 0xD000);
-                            WriteInt(cmd.CmdVal);
+                            WriteInt(cmdVal);
 
                             if (!writeOnlyRam)
                             {
                                 addrUshort = (ushort)(eepromAddr | 0x9000); // Запись Int в EEPROM
-                                WriteInt(cmd.CmdVal);
+                                WriteInt(cmdVal);
                             }
                         }
                         else if (uAddr <= 0x00FF) // Если адрес ниже, то это ROM
                         {
                             addrUshort = (ushort)(uAddr | 0x9000);
-                            WriteInt(cmd.CmdVal);
+                            WriteInt(cmdVal);
                         }
                     }
                     else if (cmdFormat == "sbyte") 
@@ -436,23 +441,23 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
                         if (high)
                         {
                             addrUshort = (ushort)(uAddr | 0xF000); // Запись в RAM старшего байта
-                            WriteByte(cmd.CmdVal);
+                            WriteByte(cmdVal);
 
-                            if (!writeOnlyRam)
+                            if (!writeOnlyRam && eepromAddr >= 0) // Запись в EEPROM разрешена если writeOnlyRam == false И EEPROM Адрес больше или равен 0
                             {
                                 addrUshort = (ushort)(eepromAddr | 0xB000); // Запись в EEPROM старшего байта
-                                WriteByte(cmd.CmdVal);
+                                WriteByte(cmdVal);
                             }
                         }
                         else
                         {
                             addrUshort = (ushort)((uAddr | 0xE000) - Convert.ToInt32(writeEvenRam)); // Запись в RAM младшего байта 0x01
-                            WriteByte(cmd.CmdVal);
+                            WriteByte(cmdVal);
 
-                            if (!writeOnlyRam)
+                            if (!writeOnlyRam && eepromAddr >= 0)  // Запись в EEPROM разрешена если writeOnlyRam == false И EEPROM Адрес больше или равен 0
                             {
                                 addrUshort = (ushort)(eepromAddr | 0xA000); // Запись в EEPROM младшего байта
-                                WriteByte(cmd.CmdVal);
+                                WriteByte(cmdVal);
                             }
                         }
                     }
@@ -472,14 +477,14 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
 
                 DeviceEvent ReadOnly = new DeviceEvent();
                 ReadOnly.DeviceTag = DeviceTags[cmd.CmdCode];
-                ReadOnly.CnlVal = cmd.CmdVal;
+                ReadOnly.CnlVal = cmdVal;
                 ReadOnly.Descr = "The Read-Only variable";
                 ReadOnly.Text = $"{error} {cmd.CmdCode}";
                 ReadOnly.Ack = false;
                 ReadOnly.TextFormat = EventTextFormat.CustomText;
                 ReadOnly.Timestamp = DateTime.UtcNow;
                 ReadOnly.CnlStat = 23;
-                ReadOnly.CnlVal = cmd.CmdVal;
+                ReadOnly.CnlVal = cmdVal;
 
                 DeviceData.EnqueueEvent(ReadOnly);
                 Log.WriteLine(error);
@@ -501,8 +506,6 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.Logic
             req[4] = xorCS(req);
 
             Request(req);
-
-            //Log.WriteLine($"Write  {ScadaUtils.BytesToHex(req)} Addr {addrUshort} Значение {cmdVal}");
         }
 
         private void WriteByte(double CmdVal)
