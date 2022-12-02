@@ -121,8 +121,11 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
                 devTemplate = FileFunc.LoadXml(typeof(DevTemplate), GetTemplatePath()) as DevTemplate;
                 bsAll.DataSource = devTemplate.Parameter;
                 dgvCmd.DataSource = bsAll;
-
                 txtDevName.Text = devTemplate.Name;
+
+                bool cbWM = false;
+                bool.TryParse(devTemplate.WriteMultiplier, out cbWM);
+                cbWriteMult.Checked = cbWM;
             }
             catch (FileNotFoundException ex)
             {
@@ -380,6 +383,12 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
 
             dgvCmd[7, e.RowIndex] = c;  // change the cell с индексом 7 (Format)
         }
+
+        private void cbWriteMult_CheckedChanged(object sender, EventArgs e)
+        {
+            devTemplate.WriteMultiplier = cbWriteMult.Checked.ToString();
+        }
+
         // -------------------------------------- Интерфейс ------------------------------
     }
 }
