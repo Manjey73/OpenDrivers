@@ -41,6 +41,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             this.btnCancel = new System.Windows.Forms.Button();
             this.txtDevName = new System.Windows.Forms.TextBox();
             this.labDevName = new System.Windows.Forms.Label();
+            this.cbWriteMult = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCmd)).BeginInit();
             this.SuspendLayout();
             // 
@@ -62,7 +63,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             this.btnMoveUpItem.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnMoveUpItem.Image = global::DrvDanfossECL.View.Properties.Resources.up;
-            this.btnMoveUpItem.Location = new System.Drawing.Point(352, 14);
+            this.btnMoveUpItem.Location = new System.Drawing.Point(332, 14);
             this.btnMoveUpItem.Name = "btnMoveUpItem";
             this.btnMoveUpItem.Size = new System.Drawing.Size(23, 22);
             this.btnMoveUpItem.TabIndex = 5;
@@ -73,7 +74,7 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             this.btnMoveDownItem.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnMoveDownItem.Image = global::DrvDanfossECL.View.Properties.Resources.down;
-            this.btnMoveDownItem.Location = new System.Drawing.Point(381, 14);
+            this.btnMoveDownItem.Location = new System.Drawing.Point(361, 14);
             this.btnMoveDownItem.Name = "btnMoveDownItem";
             this.btnMoveDownItem.Size = new System.Drawing.Size(23, 22);
             this.btnMoveDownItem.TabIndex = 6;
@@ -145,7 +146,8 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             // txtDevName
             // 
-            this.txtDevName.Location = new System.Drawing.Point(613, 12);
+            this.txtDevName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDevName.Location = new System.Drawing.Point(601, 13);
             this.txtDevName.Name = "txtDevName";
             this.txtDevName.Size = new System.Drawing.Size(172, 23);
             this.txtDevName.TabIndex = 15;
@@ -153,18 +155,33 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
             // 
             // labDevName
             // 
+            this.labDevName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.labDevName.AutoSize = true;
-            this.labDevName.Location = new System.Drawing.Point(523, 17);
+            this.labDevName.Location = new System.Drawing.Point(511, 18);
             this.labDevName.Name = "labDevName";
             this.labDevName.Size = new System.Drawing.Size(77, 15);
             this.labDevName.TabIndex = 16;
             this.labDevName.Text = "Device Name";
+            // 
+            // cbWriteMult
+            // 
+            this.cbWriteMult.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbWriteMult.AutoSize = true;
+            this.cbWriteMult.Location = new System.Drawing.Point(786, 16);
+            this.cbWriteMult.Name = "cbWriteMult";
+            this.cbWriteMult.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.cbWriteMult.Size = new System.Drawing.Size(105, 19);
+            this.cbWriteMult.TabIndex = 17;
+            this.cbWriteMult.Text = "WriteMultiplier";
+            this.cbWriteMult.UseVisualStyleBackColor = true;
+            this.cbWriteMult.CheckedChanged += new System.EventHandler(this.cbWriteMult_CheckedChanged);
             // 
             // FrmDeviceProps
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(904, 461);
+            this.Controls.Add(this.cbWriteMult);
             this.Controls.Add(this.labDevName);
             this.Controls.Add(this.txtDevName);
             this.Controls.Add(this.btnCancel);
@@ -201,5 +218,6 @@ namespace Scada.Comm.Drivers.DrvDanfossECL.View.Forms
         private Button btnCancel;
         private TextBox txtDevName;
         private Label labDevName;
+        private CheckBox cbWriteMult;
     }
 }
