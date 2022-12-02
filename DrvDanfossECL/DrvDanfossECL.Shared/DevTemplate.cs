@@ -7,6 +7,11 @@ namespace Scada.Comm.Drivers.DrvDanfossECL
     [Serializable]
     public class DevTemplate // : INotifyPropertyChanged
     {
+        //public event PropertyChangedEventHandler PropertyChanged;
+
+        //protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        //        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         public DevTemplate()
         {
             Parameter = new List<Parameters>();
@@ -15,11 +20,13 @@ namespace Scada.Comm.Drivers.DrvDanfossECL
         [XmlAttribute] public string Name { get; set; } // Имя устройства
         [XmlAttribute] public string WriteEvenRAM { get; set; } // Записывать младший байт по нечетному адресу RAM
         [XmlAttribute] public string WriteOnlyRAM { get; set; } // Записы только в RAM
+        [XmlAttribute] public string WriteMultiplier { get; set; } // Использовать множитель и при записи
+
 
         [XmlIgnore]
         public bool WriteEvenRAMSpecified { get { return WriteEvenRAM != ""; } }
         public bool WriteOnlyRAMSpecified { get { return WriteOnlyRAM != ""; } }
-
+        public bool WriteMultiplierSpecified { get { return WriteMultiplier != ""; } }
 
         [XmlElement] public List<Parameters> Parameter { get; set; }
                 public class Parameters
