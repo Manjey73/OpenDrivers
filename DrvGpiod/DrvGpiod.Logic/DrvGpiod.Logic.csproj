@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+	<EnableDynamicLoading>true</EnableDynamicLoading>
+	<AssemblyVersion>6.1.0.0</AssemblyVersion>
+	<FileVersion>6.1.0.0</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ScadaCommCommon">
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommFunc">
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommFunc.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommon">
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommon.Log">
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommon.Log.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Import Project="..\DrvGpiod.Shared\DrvGpiod.Shared.projitems" Label="Shared" />
+
+</Project>
