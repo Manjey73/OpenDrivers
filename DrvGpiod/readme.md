@@ -11,20 +11,6 @@
 Для других процессоров не всегда можно посчитать.
 Например ПК на DIN рейку JetHome JetHub D1 https://jethome.ru/d1/
 Я так и не смог понять, как узнать точный номер pin для ввода в конфигурацию, подходят номера, указанные в документации.
-Шаблон для входов/выходов прилагаю.
-
-<?xml version="1.0" encoding="utf-8"?>
-<DevTemplate Name="JetHub_Gpio">
-  <Gpios>
-    <Gpiod Name="GOUT1" Active="true" Code="out1" Pin="456" />
-    <Gpiod Name="GOUT2" Active="true" Code="out2" Pin="455" />
-    <Gpiod Name="GOUT3" Active="true" Code="out3" Pin="454" />
-    <Gpiod Name="GIN_1" Active="true" Code="in1" Pin="472" />
-    <Gpiod Name="GIN_2" Active="true" Code="in2" Pin="471" />
-    <Gpiod Name="GIN_3" Active="true" Code="in3" Pin="470" />
-    <Gpiod Name="GIN_4" Active="true" Code="in4" Pin="469" />
-  </Gpios>
-</DevTemplate>
 
 Если входы/выходы уже сконфигурированы системой, PinMode можно не указывать, но если потребуется использовать стартовое значение PinValue при запуске драйвера то должен быть указан так же как в системе (на конфликтность не проверял)
 Orange Pi не понимает типы входов InputPullDown и InputPullUp, только Input
@@ -38,7 +24,7 @@ The GPIO control driver for Scada v6.1 Used the Nuget System.Device package.Gpio
 
 As for the numbering of gpio pin, in Orange you can look at the gpioinfo command and check by calculation. For example, contact PG7 — G = 7th letter of the alphabet. (7-1)*32 + 7 = 199 pin number.
 
-For other processors, it is not always possible to calculate. For example a PC on a DIN rail JetHome JetHub D1 https://jethome.ru/d1 / I could not figure out how to find out the exact pin number for entering into the configuration, the numbers specified in the documentation are suitable. The template for the inputs/outputs is attached.
+For other processors, it is not always possible to calculate. For example a PC on a DIN rail JetHome JetHub D1 https://jethome.ru/d1 / I could not figure out how to find out the exact pin number for entering into the configuration, the numbers specified in the documentation are suitable.
 
 If the inputs/outputs are already configured by the system, pinMode can not be specified, but if you need to use the starting PinValue value when starting the driver, it should be specified in the same way as in the system (I did not check for conflicts) Orange Pi does not understand the input types InputPullDown and InputPullUp, only Input
 
