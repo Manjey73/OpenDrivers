@@ -1,6 +1,6 @@
 [DrvGpiod v6.1.0.0](https://github.com/Manjey73/OpenDrivers/releases/download/DrvGpiod/DrvGpiod.zip)
 
-                                                                               Russian
+                                                               Russian
 Драйвер управления GPIO для Scada v6.1
 Использовался пакет Nuget System.Device.Gpio v2.2.0 в качестве прокладки для пакета gpiod (apt install gpiod)
 В некоторых системах пакет установлен.
@@ -17,7 +17,7 @@ Orange Pi не понимает типы входов InputPullDown и InputPull
 
 На Raspberry пока не проверял.
 
-                                                                                 English
+                                                                 English
 
 
 The GPIO control driver for Scada v6.1 Used the Nuget System.Device package.Gpio v2.2.0 as a gasket for the gpiod package (apt install gpiod) On some systems, the package is installed.
