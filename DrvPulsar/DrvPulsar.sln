@@ -1,0 +1,38 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrvPulsar.Logic", "DrvPulsar.Logic\DrvPulsar.Logic.csproj", "{FBBCDAB9-1813-4530-A6CF-C59C946A3B54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrvPulsar.View", "DrvPulsar.View\DrvPulsar.View.csproj", "{702C2AE1-BDB7-4554-90B4-71B3257A1977}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DrvPulsar.Shared", "DrvPulsar.Shared\DrvPulsar.Shared.shproj", "{63FB220D-1A64-4B39-98D8-30A88EEAA6FF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBBCDAB9-1813-4530-A6CF-C59C946A3B54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBBCDAB9-1813-4530-A6CF-C59C946A3B54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBBCDAB9-1813-4530-A6CF-C59C946A3B54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBBCDAB9-1813-4530-A6CF-C59C946A3B54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{702C2AE1-BDB7-4554-90B4-71B3257A1977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{702C2AE1-BDB7-4554-90B4-71B3257A1977}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{702C2AE1-BDB7-4554-90B4-71B3257A1977}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{702C2AE1-BDB7-4554-90B4-71B3257A1977}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {79D3DE56-7776-4EA8-B53D-815C3012893F}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DrvPulsar.Shared\DrvPulsar.Shared.projitems*{63fb220d-1a64-4b39-98d8-30a88eeaa6ff}*SharedItemsImports = 13
+		DrvPulsar.Shared\DrvPulsar.Shared.projitems*{702c2ae1-bdb7-4554-90b4-71b3257a1977}*SharedItemsImports = 5
+		DrvPulsar.Shared\DrvPulsar.Shared.projitems*{fbbcdab9-1813-4530-a6cf-c59c946a3b54}*SharedItemsImports = 5
+	EndGlobalSection
+EndGlobal
