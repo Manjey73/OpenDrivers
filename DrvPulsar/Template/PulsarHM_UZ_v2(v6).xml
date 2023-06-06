@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DevTemplate Name="Пульсар HeatMeter UZ v4">
+  <SndGroups>
+    <SndGroup Counter="1" Active="true" Name="Текущие параметры" GroupName="Текущие параметры" Command="01" userData="">
+      <Vals Channel="2" Code="Resistance" Active="false" Name="Сопротивление обр.[Ом]" Format="float" Multiplier="1" />
+      <Vals Channel="3" Code="Tfeed" Active="true" Name="Температура под. [гр.С]" Format="float" Multiplier="1" />
+      <Vals Channel="4" Code="Treturn" Active="true" Name="Температура обр. [гр.С]" Format="float" Multiplier="1" />
+      <Vals Channel="5" Code="Tdiff" Active="true" Name="Перепад температур [гр.С]" Format="float" Multiplier="1" />
+      <Vals Channel="6" Code="power" Active="true" Name="Мощность [ГКал/ч]" Format="float" Multiplier="1" />
+      <Vals Channel="7" Code="energy" Active="true" Name="Энергия [ГКал]" Format="float" Multiplier="1" />
+      <Vals Channel="8" Code="Volume" Active="true" Name="Объем 1 [м.куб](V1)" Format="float" Multiplier="1" />
+      <Vals Channel="9" Code="consumption" Active="true" Name="Расход [м.куб/ч]" Format="float" Multiplier="1" />
+      <Vals Channel="10" Code="pulse1" Active="true" Name="Имп. вход1 [м.куб]" Format="float" Multiplier="1" />
+      <Vals Channel="11" Code="pulse2" Active="false" Name="Имп. вход2 [м.куб]" Format="float" Multiplier="1" />
+      <Vals Channel="12" Code="pulse3" Active="false" Name="Имп. вход3 [м.куб]" Format="float" Multiplier="1" />
+      <Vals Channel="13" Code="pulse4" Active="false" Name="Имп. вход4 [м.куб]" Format="float" Multiplier="1" />
+      <Vals Channel="20" Code="NormalTime" Active="true" Name="Время нормальной работы [ч]" Format="uint32" Multiplier="1" />
+      <Vals Channel="21" Code="Cooling energy" Active="true" Name="Энергия охлаждения [ГКал](Q1)" Format="float" Multiplier="1" />
+      <Vals Channel="22" Code="presure1" Active="true" Name="Давление1 (P1)" Format="float" Multiplier="1" />
+      <Vals Channel="23" Code="presure2" Active="true" Name="Давление2 (P2)" Format="float" Multiplier="1" />
+      <Vals Channel="24" Code="massa" Active="true" Name="Масса 1 (m1)" Format="float" Multiplier="1" />
+      <Vals Channel="25" Code="massacold" Active="true" Name="Масса холодной трубы (m2)" Format="float" Multiplier="1" />
+      <Vals Channel="26" Code="lostmass" Active="true" Name="Масса отобранной (потерянной) воды (?m)" Format="float" Multiplier="1" />
+      <Vals Channel="27" Code="ColdVolume" Active="true" Name="Объем холодной воды (V2)" Format="float" Multiplier="1" />
+      <Vals Channel="28" Code="consumedEnergy" Active="true" Name="Энергия израсходованной воды (?Q)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="2" Active="false" Name="Вес имп. Вх1" GroupName="Параметры настройки" Command="0A" userData="20">
+      <Vals Channel="33" Code="weightP1" Active="true" Name="Вес имп. Вх1 (м3)" Format="float" Multiplier="1" Writable="true" />
+    </SndGroup>
+    <SndGroup Counter="3" Active="false" Name="Длительность имп. Вх1" GroupName="Параметры настройки" Command="0A" userData="21">
+      <Vals Channel="34" Code="durationP1" Active="true" Name="Длительность имп. Вх1 (мс)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="4" Active="false" Name="Вес имп. Вх2" GroupName="Параметры настройки" Command="0A" userData="23">
+      <Vals Channel="35" Code="weightP2" Active="true" Name="Вес имп. Вх2 (м3)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="5" Active="false" Name="Длительность имп. Вх2" GroupName="Параметры настройки" Command="0A" userData="24">
+      <Vals Channel="36" Code="durationP2" Active="true" Name="Длительность имп. Вх2 (мс)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="6" Active="false" Name="Вес имп. Вх3" GroupName="Параметры настройки" Command="0A" userData="26">
+      <Vals Channel="37" Code="weightP3" Active="true" Name="Вес имп. Вх3 (м3)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="7" Active="false" Name="Длительность имп. Вх3" GroupName="Параметры настройки" Command="0A" userData="27">
+      <Vals Channel="38" Code="durationP3" Active="true" Name="Длительность имп. Вх3 (мс)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="8" Active="false" Name="Вес имп. Вх4" GroupName="Параметры настройки" Command="0A" userData="29">
+      <Vals Channel="39" Code="weightP4" Active="true" Name="Вес имп. Вх4 (м3)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="9" Active="false" Name="Длительность имп. Вх4" GroupName="Параметры настройки" Command="0A" userData="2A">
+      <Vals Channel="40" Code="durationP4" Active="true" Name="Длительность имп. Вх4 (мс)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="10" Active="false" Name="Вес имп. Вых" GroupName="Параметры настройки" Command="0A" userData="2C">
+      <Vals Channel="41" Code="weightPOut" Active="true" Name="Вес имп. Вых [Гкал/имп]" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="11" Active="false" Name="Длительность имп. Вых" GroupName="Параметры настройки" Command="0A" userData="2D">
+      <Vals Channel="42" Code="durationPO" Active="true" Name="Длительность имп. Вых (мс)" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="12" Active="false" Name="Системное время" GroupName="Системные данные" Command="04" userData="">
+      <Vals Channel="43" Code="sysTime" Active="true" Name="Системное время" Format="DateTime" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="13" Active="false" Name="Авто Зима/Лето" GroupName="Системные данные" Command="0A" userData="01">
+      <Vals Channel="44" Code="autoTime" Active="true" Name="Авто Зима/Лето" Format="uint16" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="14" Active="false" Name="Версия прошивки" GroupName="Системные данные" Command="0A" userData="05">
+      <Vals Channel="45" Code="version" Active="true" Name="Версия прошивки" Format="uint32" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="15" Active="true" Name="Ошибки (маска 2Byte)" GroupName="Системные данные" Command="0A" userData="06">
+      <Vals Channel="46" Code="error" Active="true" Name="Ошибки (маска)" Format="uint32" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="16" Active="false" Name="Время с ош. по маске" GroupName="Системные данные" Command="0A" userData="0E">
+      <Vals Channel="47" Code="timeMask" Active="true" Name="Время с ош. по маске" Format="uint32" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="17" Active="false" Name="Время с ошибками" GroupName="Системные данные" Command="0A" userData="0D">
+      <Vals Channel="48" Code="TimeError" Active="true" Name="Время с ошибками" Format="uint32" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="18" Active="false" Name="Т. хв" GroupName="Системные данные" Command="0A" userData="50">
+      <Vals Channel="49" Code="Tcold" Active="true" Name="Т. хв" Format="float" Multiplier="1" />
+    </SndGroup>
+  </SndGroups>
+  <CmdGroups>
+    <CmdGroup Channel="43" Code="writeTime" Active="false" Name="Запись времени" Command="05" userData="" Format="DateTime" />
+    <CmdGroup Channel="44" Code="writeAuto" Active="true" Name="Авто Зима/Лето" Command="0B" userData="01" Format="uint16" />
+  </CmdGroups>
+</DevTemplate>

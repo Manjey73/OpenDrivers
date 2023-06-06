@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DevTemplate Name="Пульсар Water">
+  <SndGroups>
+    <SndGroup Counter="1" Active="true" Name="Текущие параметры" GroupName="Текущие параметры" Command="01" userData="1">
+      <Vals Channel="1" Code="cnl1_m3" Active="true" Name="Канал1 [м.куб]" Format="float" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="2" Active="true" Name="Саботажные срабатывания" GroupName="Системные данные" Command="0A" userData="1C">
+      <Vals Channel="33" Code="sabotazh" Active="true" Name="Саботажные срабатывания" Format="uint32" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="3" Active="false" Name="Системное время" GroupName="Системные данные" Command="04" userData="">
+      <Vals Channel="34" Code="sysTime" Active="true" Name="Системное время" Format="DateTime" Multiplier="1" />
+    </SndGroup>
+  </SndGroups>
+  <CmdGroups>
+    <CmdGroup Channel="34" Code="writeTime" Active="false" Name="Запись времени" Command="05" userData="" Format="DateTime" />
+  </CmdGroups>
+</DevTemplate>

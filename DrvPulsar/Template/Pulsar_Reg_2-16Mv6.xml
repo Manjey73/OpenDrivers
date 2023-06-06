@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DevTemplate Name="Пульсар Регистратор 2-16М">
+  <SndGroups>
+    <SndGroup Counter="1" Active="true" Name="Текущие параметры" GroupName="Текущие параметры" Command="01" userData="1">
+      <Vals Channel="1" Code="channel1" Active="true" Name="Канал1" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="2" Code="channel2" Active="true" Name="Канал2" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="3" Code="channel3" Active="true" Name="Канал3" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="4" Code="channel4" Active="true" Name="Канал4" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="5" Code="channel5" Active="true" Name="Канал5" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="6" Code="channel6" Active="true" Name="Канал6" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="7" Code="channel7" Active="true" Name="Канал7" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="8" Code="channel8" Active="true" Name="Канал8" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="9" Code="channel9" Active="true" Name="Канал9" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="10" Code="channel10" Active="true" Name="Канал10" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="11" Code="channel11" Active="false" Name="Канал11" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="12" Code="channel12" Active="false" Name="Канал12" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="13" Code="channel13" Active="false" Name="Канал13" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="14" Code="channel14" Active="false" Name="Канал14" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="15" Code="channel15" Active="false" Name="Канал15" Format="double" Multiplier="1" Writable="true" Command="03" />
+      <Vals Channel="16" Code="channel16" Active="false" Name="Канал16" Format="double" Multiplier="1" Writable="true" Command="03" />
+    </SndGroup>
+    <SndGroup Counter="2" Active="true" Name="Вес импульсов каналов" GroupName="Параметры настройки" Command="07" userData="21">
+      <Vals Channel="21" Code="weightP1" Active="true" Name="Вес импульса, К1" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="22" Code="weightP2" Active="true" Name="Вес импульса, К2" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="23" Code="weightP3" Active="true" Name="Вес импульса, К3" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="24" Code="weightP4" Active="true" Name="Вес импульса, К4" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="25" Code="weightP5" Active="true" Name="Вес импульса, К5" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="26" Code="weightP6" Active="true" Name="Вес импульса, К6" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="27" Code="weightP7" Active="true" Name="Вес импульса, К7" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="28" Code="weightP8" Active="true" Name="Вес импульса, К8" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="29" Code="weightP9" Active="true" Name="Вес импульса, К9" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="30" Code="weightP10" Active="true" Name="Вес импульса, К10" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="31" Code="weightP11" Active="false" Name="Вес импульса, К11" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="32" Code="weightP12" Active="false" Name="Вес импульса, К12" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="33" Code="weightP13" Active="false" Name="Вес импульса, К13" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="34" Code="weightP14" Active="false" Name="Вес импульса, К14" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="35" Code="weightP15" Active="false" Name="Вес импульса, К15" Format="float" Multiplier="1" Writable="true" Command="08" />
+      <Vals Channel="36" Code="weightP16" Active="false" Name="Вес импульса, К16" Format="float" Multiplier="1" Writable="true" Command="08" />
+    </SndGroup>
+    <SndGroup Counter="3" Active="true" Name="Системное время" GroupName="Системные данные" Command="04" userData="">
+      <Vals Channel="40" Code="sysTime" Active="true" Name="Системное время" Format="DateTime" Multiplier="1" Writable="true" />
+    </SndGroup>
+    <SndGroup Counter="4" Active="true" Name="Авто Зима/Лето" GroupName="Системные данные" Command="0A" userData="01">
+      <Vals Channel="41" Code="autoTime" Active="true" Name="Авто Зима/Лето" Format="uint16" Multiplier="1" Writable="true" Command="0B" userData="01" />
+    </SndGroup>
+    <SndGroup Counter="5" Active="true" Name="Версия прошивки" GroupName="Системные данные" Command="0A" userData="05">
+      <Vals Channel="42" Code="version" Active="true" Name="Версия прошивки" Format="uint32" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="6" Active="true" Name="Диагностика (маска ошибок)" GroupName="Системные данные" Command="0A" userData="06">
+      <Vals Channel="43" Code="maskError" Active="true" Name="Диагностика (маска ошибок)" Format="uint32" Multiplier="1" />
+    </SndGroup>
+    <SndGroup Counter="7" Active="false" Name="Мин. длит. паузы(мс)" GroupName="Параметры настройки" Command="0A" userData="04">
+      <Vals Channel="44" Code="minPause" Active="true" Name="Мин. длит. паузы(мс)" Format="float" Multiplier="1" Writable="true" Command="0B" userData="04" />
+    </SndGroup>
+    <SndGroup Counter="8" Active="false" Name="Мин. длит. имп.(мс)" GroupName="Параметры настройки" Command="0A" userData="03">
+      <Vals Channel="45" Code="minPulse" Active="true" Name="Мин. длит. имп.(мс)" Format="float" Multiplier="1" Writable="true" Command="0B" userData="03" />
+    </SndGroup>
+  </SndGroups>
+  <CmdGroups>
+    <CmdGroup Channel="1" Code="test K1" Active="true" Name="Тестовая запись K1" Command="03" userData="" Format="double" />
+  </CmdGroups>
+</DevTemplate>
