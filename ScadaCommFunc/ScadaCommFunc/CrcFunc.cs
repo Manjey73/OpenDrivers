@@ -1,3 +1,4 @@
+using System;
 
 namespace ScadaCommFunc
 {
@@ -38,12 +39,13 @@ namespace ScadaCommFunc
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public static ushort CRC16_XModem(byte[] msg)
+        public static ushort CRC16_XModem(byte[] msg, int offset = 0, int count = 0) // добавлен offset и count
         {
             const ushort polinom = 0x1021;
             ushort code = 0x0000;
+            if (count == 0) count = msg.Length;                                     // добавлен
 
-            for (int i = 0, size = msg.Length; i < size; ++i)
+            for (int i = offset, last = count + offset; i < last; ++i)              // msg.Length убрать ofsett
             {
                 code ^= (ushort)(msg[i] << 8);
                 for (uint j = 0; j < 8; ++j)
