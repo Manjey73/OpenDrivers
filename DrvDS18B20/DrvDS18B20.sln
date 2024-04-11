@@ -1,0 +1,38 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrvDS18B20.Logic", "DrvDS18B20.Logic\DrvDS18B20.Logic.csproj", "{06EFAF28-BD05-40B9-B979-EC36720A9B22}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrvDS18B20.View", "DrvDS18B20.View\DrvDS18B20.View.csproj", "{7ACEDD9B-96DF-414A-8F51-7E80D0726551}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DrvDS18B20.Shared", "DrvDS18B20.Shared\DrvDS18B20.Shared.shproj", "{AA7A8715-9B27-48B1-95BC-CD5ABADF12DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{06EFAF28-BD05-40B9-B979-EC36720A9B22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06EFAF28-BD05-40B9-B979-EC36720A9B22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06EFAF28-BD05-40B9-B979-EC36720A9B22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06EFAF28-BD05-40B9-B979-EC36720A9B22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7ACEDD9B-96DF-414A-8F51-7E80D0726551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ACEDD9B-96DF-414A-8F51-7E80D0726551}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ACEDD9B-96DF-414A-8F51-7E80D0726551}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ACEDD9B-96DF-414A-8F51-7E80D0726551}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88B30AE1-A123-40BB-AD1E-89B6D4C2DCA2}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DrvDS18B20.Shared\DrvDS18B20.Shared.projitems*{06efaf28-bd05-40b9-b979-ec36720a9b22}*SharedItemsImports = 5
+		DrvDS18B20.Shared\DrvDS18B20.Shared.projitems*{7acedd9b-96df-414a-8f51-7e80d0726551}*SharedItemsImports = 5
+		DrvDS18B20.Shared\DrvDS18B20.Shared.projitems*{aa7a8715-9b27-48b1-95bc-cd5abadf12da}*SharedItemsImports = 13
+	EndGlobalSection
+EndGlobal
