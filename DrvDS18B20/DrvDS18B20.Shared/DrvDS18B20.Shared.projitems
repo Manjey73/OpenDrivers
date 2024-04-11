@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>aa7a8715-9b27-48b1-95bc-cd5abadf12da</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>DrvDS18B20.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Config\DeviceOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DriverUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Config\Ds18b20DeviceConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Config\VarGroupConfig.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Config\VarGroupList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Config\VariableConfig.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Config\" />
+  </ItemGroup>
+</Project>
