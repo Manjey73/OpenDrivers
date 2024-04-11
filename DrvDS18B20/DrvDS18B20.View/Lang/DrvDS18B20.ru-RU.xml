@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DrvDS18B20Dictionaries>
+  <Dictionary key="Scada.Comm.Drivers.DrvDS18B20.Config.VarGroupConfig">
+    <Phrase key="Active.DisplayName">Активна</Phrase>
+    <Phrase key="Active.Category">Основные параметры</Phrase>
+    <Phrase key="Active.Description">Значение, указывающее, активна ли группа.</Phrase>
+    <Phrase key="Name.DisplayName">Наименование</Phrase>
+    <Phrase key="Name.Category">Основные параметры</Phrase>
+    <Phrase key="Name.Description">Наименование группы.</Phrase>
+  </Dictionary>
+  <Dictionary key="Scada.Comm.Drivers.DrvDS18B20.Config.VariableConfig">
+	<Phrase key="Active.DisplayName">Активна</Phrase>
+	<Phrase key="Active.Category">Основные параметры</Phrase>
+	<Phrase key="Active.Description">Значение, указывающее, активна ли переменная.</Phrase>
+	<Phrase key="Name.DisplayName">Наименование</Phrase>
+    <Phrase key="Name.Category">Основные параметры</Phrase>
+    <Phrase key="Name.Description">Наименование переменной.</Phrase>
+    <Phrase key="TagCode.DisplayName">Код тега</Phrase>
+    <Phrase key="TagCode.Category">Основные параметры</Phrase>
+    <Phrase key="TagCode.Description">Код тега, связанного с переменной.</Phrase>
+    <Phrase key="DsId.DisplayName">DsId</Phrase>
+    <Phrase key="DsId.Category">Основные параметры</Phrase>
+    <Phrase key="DsId.Description">Идентификатор датчика. Например, 28-031683d7c9ff</Phrase>
+  </Dictionary>
+  <Dictionary key="Scada.Comm.Drivers.DrvDS18B20.View.DsConfigProvider">
+    <Phrase key="FormTitle">Свойства устройства {0}</Phrase>
+    <Phrase key="AddVarGroupButton">Добавить группу</Phrase>
+    <Phrase key="AddVariableButton">Добавить переменную</Phrase>
+    <Phrase key="OptionsNode">Параметры</Phrase>
+    <Phrase key="VarGroupsNode">Группы переменных</Phrase>
+    <Phrase key="UnnamedGroup">&lt;Безымянная группа&gt;</Phrase>
+    <Phrase key="UnnamedVariable">&lt;Безымянная переменная&gt;</Phrase>
+  </Dictionary>
+</DrvDS18B20Dictionaries>

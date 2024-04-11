@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DrvDS18B20Dictionaries>
+  <Dictionary key="Scada.Comm.Drivers.DrvDS18B20.Config.VarGroupConfig">
+    <Phrase key="Active.DisplayName">Active</Phrase>
+    <Phrase key="Active.Category">Main Parameters</Phrase>
+    <Phrase key="Active.Description">A value indicating whether the group is active.</Phrase>
+    <Phrase key="Name.DisplayName">Name</Phrase>
+    <Phrase key="Name.Category">Main Parameters</Phrase>
+    <Phrase key="Name.Description">The group name.</Phrase>
+  </Dictionary>
+  <Dictionary key="Scada.Comm.Drivers.DrvDS18B20.Config.VariableConfig">
+    <Phrase key="Active.DisplayName">Active</Phrase>
+	<Phrase key="Active.Category">Main Parameters</Phrase>
+	<Phrase key="Active.Description">A value indicating whether the variable is active.</Phrase>
+	<Phrase key="Name.DisplayName">Name</Phrase>
+    <Phrase key="Name.Category">Main Parameters</Phrase>
+    <Phrase key="Name.Description">The variable name.</Phrase>
+    <Phrase key="TagCode.DisplayName">Tag code</Phrase>
+    <Phrase key="TagCode.Category">Main Parameters</Phrase>
+    <Phrase key="TagCode.Description">The tag code associated with the variable.</Phrase>
+    <Phrase key="DsId.DisplayName">DsId</Phrase>
+    <Phrase key="DsId.Category">Main Parameters</Phrase>
+    <Phrase key="DsId.Description">Sensor ID. For example, 28-031683d7c9ff</Phrase>
+  </Dictionary>
+  <Dictionary key="Scada.Comm.Drivers.DrvDS18B20.View.DsConfigProvider">
+    <Phrase key="FormTitle">Device {0} Properties</Phrase>
+    <Phrase key="AddVarGroupButton">Add Group</Phrase>
+    <Phrase key="AddVariableButton">Add Variable</Phrase>
+    <Phrase key="OptionsNode">Options</Phrase>
+    <Phrase key="VarGroupsNode">Variable Groups</Phrase>
+    <Phrase key="UnnamedGroup">&lt;Unnamed Group&gt;</Phrase>
+    <Phrase key="UnnamedVariable">&lt;Unnamed Variable&gt;</Phrase>
+  </Dictionary>
+</DrvDS18B20Dictionaries>
