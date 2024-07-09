@@ -80,6 +80,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x
                 [XmlAttribute] public string range { get; set; }
             }
         }
+
         public class PowerProfile
         {
             public PowerProfile()
@@ -124,6 +125,8 @@ namespace Scada.Comm.Drivers.DrvMercury23x
                 [XmlAttribute] public string range { get; set; }
             }
         }
+
+
         public class CmdGroup
         {
             public CmdGroup()
@@ -170,5 +173,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x
             [XmlAttribute] public string Name { get; set; }
             [XmlAttribute] public string Type { get; set; }
         }
+
     }
 }
+
+
+
