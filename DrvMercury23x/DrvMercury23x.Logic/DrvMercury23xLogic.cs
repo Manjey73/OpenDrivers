@@ -2,6 +2,7 @@ using Scada.Comm.Config;
 using Scada.Comm.Devices;
 
 
+
 namespace Scada.Comm.Drivers.DrvMercury23x.Logic
 {
     public class DrvMercury23xLogic : DriverLogic
@@ -33,5 +34,8 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         {
             return new DevMercury23xLogic(CommContext, lineContext, deviceConfig);
         }
+
+        //PollingOptions pollingOptions = new PollingOptions(1500, 300);
+               
     }
 }
