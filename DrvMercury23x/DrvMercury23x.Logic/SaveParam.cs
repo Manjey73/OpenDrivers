@@ -15,5 +15,6 @@ namespace Scada.Comm.Drivers.DrvMercury23x
         [XmlAttribute] public string serial { get; set; }       // Серийный номер
         [XmlAttribute] public string madeDt { get; set; }       // Дата производства
         [XmlAttribute] public string constA { get; set; }       // Постоянная счетчика
+
     }
 }
