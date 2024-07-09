@@ -1,5 +1,11 @@
+// Copyright (c) Rapid Software LLC. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+
 using Scada.Comm.Devices;
 using Scada.Data.Const;
+//using ScadaCommFunc;
+//using System.Collections.Generic;
+//using System.Linq;
 
 namespace Scada.Comm.Drivers.DrvMercury23x
 {
@@ -11,11 +17,10 @@ namespace Scada.Comm.Drivers.DrvMercury23x
     {
         public class ActiveChannel
         {
-            public string GroupName;
+            public string GroupName; // = ""
             public string Name;
             public string Code;
             public int CnlType;
-#pragma warning disable 0649
             public int Mode;
             public string range;
             public byte[] setCommand;
@@ -26,13 +31,12 @@ namespace Scada.Comm.Drivers.DrvMercury23x
             public int idxPar;          // Индекс параметра в группе тегов
             public string CnlQuantity;  // Величина переменной
             public string unitCode;     // Размерность переменной
-#pragma warning restore 0649
         }
 
         /// <summary>
         /// Gets the grouped channel prototypes.
         /// </summary>
-        public static List<CnlPrototypeGroup> GetCnlPrototypeGroups(Dictionary<string, ActiveChannel> activeChannels)
+        public static List<CnlPrototypeGroup> GetCnlPrototypeGroups(Dictionary<string, ActiveChannel> activeChannels) // Dictionary<string, ActiveChannel> activeChannel
         {
             List<CnlPrototypeGroup> groups = new List<CnlPrototypeGroup>();
 
