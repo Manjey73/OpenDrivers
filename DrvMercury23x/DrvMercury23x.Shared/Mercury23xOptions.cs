@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
 using Scada.Config;
 using System.ComponentModel;
+using Scada.Lang;
 
 namespace Scada.Comm.Drivers.DrvMercury23x
 {
@@ -23,6 +27,8 @@ namespace Scada.Comm.Drivers.DrvMercury23x
             Level = options.GetValueAsString("Level");
         }
 
+        //var category = Locale.IsRussian ? "Доступ" : "Access";
+
         [Description("Пароль 1-ого уровня"), Category("Доступ")]
         public string UserPwd { get; set; }
 
@@ -43,5 +49,6 @@ namespace Scada.Comm.Drivers.DrvMercury23x
             options["AdminPassword"] = AdminPwd;
             options["Level"] = Level;
         }
+
     }
 }
