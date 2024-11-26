@@ -66,18 +66,18 @@ namespace Scada.Comm.Drivers.DrvMercury23x
                 {
                 }
 
-                public Vals(string name, string code, bool active, string range)
+                public Vals(string name, string code, bool active, string multiplier)
                 {
                     this.name = name;
                     this.code = code;
                     this.active = active;
-                    this.range = range;
+                    this.multiplier = multiplier;
                 }
 
                 [XmlAttribute] public string name { get; set; }
                 [XmlAttribute] public string code { get; set; }
                 [XmlAttribute] public bool active { get; set; }
-                [XmlAttribute] public string range { get; set; }
+                [XmlAttribute] public string multiplier { get; set; }
             }
         }
 
@@ -111,18 +111,18 @@ namespace Scada.Comm.Drivers.DrvMercury23x
                 {
                 }
 
-                public Vals1(string name, string code, bool active, string range)
+                public Vals1(string name, string code, bool active, string multiplier)
                 {
                     this.name = name;
                     this.code = code;
                     this.active = active;
-                    this.range = range;
+                    this.multiplier = multiplier;
                 }
 
                 [XmlAttribute] public string name { get; set; }
                 [XmlAttribute] public string code { get; set; }
                 [XmlAttribute] public bool active { get; set; }
-                [XmlAttribute] public string range { get; set; }
+                [XmlAttribute] public string multiplier { get; set; }
             }
         }
 
