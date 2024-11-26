@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Scada.Config;
 using System.ComponentModel;
-using Scada.Lang;
 
 namespace Scada.Comm.Drivers.DrvMercury23x
 {
@@ -29,13 +25,13 @@ namespace Scada.Comm.Drivers.DrvMercury23x
 
         //var category = Locale.IsRussian ? "Доступ" : "Access";
 
-        [Description("Пароль 1-ого уровня"), Category("Доступ")]
+        [Description("Пароль 1-ого уровня (user password)"), Category("Доступ")]
         public string UserPwd { get; set; }
 
-        [Description("Пароль 2-ого уровня"), Category("Доступ")]
+        [Description("Пароль 2-ого уровня (admin password)"), Category("Доступ")]
         public string AdminPwd { get; set; }
 
-        [Description("Уровень доступа"), Category("Доступ")]
+        [Description("Уровень доступа, допустимые значения:\n1 или user; 2 или admin"), Category("Доступ")]
         public string Level { get; set; }
 
         /// <summary>
