@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-	<Version>6.2.0.5</Version>
-	<AssemblyVersion>6.2.0.5</AssemblyVersion>
-	<FileVersion>6.2.0.5</FileVersion>
+	<Version>6.3.0.2</Version>
+	<AssemblyVersion>6.3.0.2</AssemblyVersion>
+	<FileVersion>6.3.0.2</FileVersion>
   </PropertyGroup>
 
   <Import Project="..\DrvMercury23x.Shared\DrvMercury23x.Shared.projitems" Label="Shared" />
