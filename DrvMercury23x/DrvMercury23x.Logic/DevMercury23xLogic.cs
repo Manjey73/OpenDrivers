@@ -50,7 +50,21 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         private void InitRequests()
         {
             requests.testCnlReq = Protocol.TestCnlReq(NumAddress);
-            requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, Level, UserPwd);
+
+
+            if (Level == "1" || Level.ToLower() == "user")
+            {
+                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "1", UserPwd);
+            }
+            else if ( Level == "2" || Level.ToLower() == "admin")
+            {
+                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "2", AdminPwd);
+            }
+            else
+            {
+                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "1", UserPwd);
+            }
+
             requests.openAdmReq = Protocol.OpenCnlReq(NumAddress, "2", AdminPwd);
             requests.closeCnlReq = Protocol.WriteComReq(NumAddress, 0x02);
             requests.readTimeReq = Protocol.WriteCompReq(NumAddress, 0x04, 0x00);
@@ -576,7 +590,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                                     {
                                         profileName = devTemplate.ProfileGroups[i].value[k].name,
                                         code = devTemplate.ProfileGroups[i].value[k].code,
-                                        range = SToDouble(devTemplate.ProfileGroups[i].value[k].range),
+                                        range = SToDouble(devTemplate.ProfileGroups[i].value[k].multiplier),
                                         offset = k * 2
                                     });
                                 }
@@ -873,214 +887,221 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 }
             }
 
-            // ------------Получить мгновенные значения P,Q,S,U,I вариант 2
-            if (readPQSUI != 0)
+            // При закрытом канале связи не опрашивать счетчик и выйти, выставив все в невалидное состояние
+            if (!prop.opencnl)
             {
-                if (readparam == "14h") // При чтении параметром 16h не нужна фиксация данных
+                DeviceData.Invalidate();
+            }
+            else
+            {
+                // ------------Получить мгновенные значения P,Q,S,U,I вариант 2
+                if (readPQSUI != 0)
                 {
-                    if (devTemplate.multicast)
+                    if (readparam == "14h") // При чтении параметром 16h не нужна фиксация данных
                     {
-                        DateTime datetime = DateTime.Now;
+                        if (devTemplate.multicast)
+                        {
+                            DateTime datetime = DateTime.Now;
 
-                        if (prop.firstKp == DeviceNum)
-                        {
-                            // запись для всех КП времени фиксации и посылка команды фиксации данных
-                            for (int x = 0; x < LineContext.SharedData.Count; x++)
+                            if (prop.firstKp == DeviceNum)
                             {
-                                try
+                                // запись для всех КП времени фиксации и посылка команды фиксации данных
+                                for (int x = 0; x < LineContext.SharedData.Count; x++)
                                 {
-                                    var Val = (MyDevice)LineContext.SharedData.ElementAt(x).Value;
-                                    Val.dt = datetime;
+                                    try
+                                    {
+                                        var Val = (MyDevice)LineContext.SharedData.ElementAt(x).Value;
+                                        Val.dt = datetime;
+                                    }
+                                    catch { }
                                 }
-                                catch { }
-                            }
-                            Write(requests.fixDataReq);
-                            Thread.Sleep(PollingOptions.Delay);
-                        }
-                        else
-                        {
-                            // Тут сравнение времени фиксации и при необходимости отправка команды фиксации данных
-                            if (datetime.Subtract(prop.dt).TotalSeconds > fixTime)
-                            {
                                 Write(requests.fixDataReq);
                                 Thread.Sleep(PollingOptions.Delay);
                             }
-                        }
-                    }
-                    else // используем команду фиксации по адресу счетчика
-                    {
-                        Request(requests.fixDataReq, 4);
-                    }
-                }
-
-                // --------- формирование запросов P,Q,S,U,I и энергия от сброса при параметре 14h или 16h
-                for (int f = 0; f < nbwri.Length; f++)
-                {
-                    int bwrim = nbwri[f] & 0xf0;
-
-                    requests.dataReq = Protocol.DataReq(NumAddress, readparam, nbwri[f]);
-
-                    Request(requests.dataReq, nb_length[f]);
-                    int quantity = channels[DeviceTags[tagIndex].Code].quantity; // Количество активных каналов в текущем запросе, проверенных на этапе создания каналов
-
-                    if (LastRequestOK)
-                    {
-                        int idxP = 0;
-                        int znx = 1;
-                        for (int zn = 0; zn < nparc[f]; zn++) // nparc[f] количество параметров в ответе для разных запросов.
-                        {
-
-                            if (channels[DeviceTags[tagIndex].Code].idxPar == idxP)
+                            else
                             {
-                                byte[] zn_temp = new byte[4];
-                                uint znac_temp; // = 0; было
-
-                                if (nparb[f] == 4)
+                                // Тут сравнение времени фиксации и при необходимости отправка команды фиксации данных
+                                if (datetime.Subtract(prop.dt).TotalSeconds > fixTime)
                                 {
-                                    Array.Copy(inBuf, znx, zn_temp, 0, nparb[f]);                       // Копирование количества байт nparb[f] во временный буфер
-                                    znac_temp = BitConverter.ToUInt32(zn_temp, 0);
-
-                                    znac_temp = BitFunc.ROR(znac_temp, 16);
-                                    if (nbwri[f] == 0x00 && (znac_temp & 0x80000000) >= 1) Napr = -1;   // определение направления Активной   мощности
-                                    if (nbwri[f] == 0x04 && (znac_temp & 0x40000000) >= 1) Napr = -1;   // определение направления Реактивной мощности
-                                    if (bwrim != 0xf0) znac_temp = znac_temp & 0x3fffffff;              // наложение маски для удаления направления для получения значения
+                                    Write(requests.fixDataReq);
+                                    Thread.Sleep(PollingOptions.Delay);
                                 }
-                                else
-                                {
-                                    Array.Copy(inBuf, znx, zn_temp, 0, 1);
-                                    Array.Copy(inBuf, znx + 1, zn_temp, 2, 2);
-                                    znac_temp = BitConverter.ToUInt32(zn_temp, 0);
-
-                                    znac_temp = BitFunc.ROR(znac_temp, 16);
-                                    if (nbwri[f] == 0x00 && (znac_temp & 0x800000) >= 1) Napr = -1;   // определение направления Активной   мощности
-                                    if (nbwri[f] == 0x04 && (znac_temp & 0x400000) >= 1) Napr = -1;   // определение направления Реактивной мощности
-                                    if (bwrim != 0xf0) znac_temp = znac_temp & 0x3fffff;              // наложение маски для удаления направления для получения значения
-                                    if (nbwri[f] == 0x30) znac_temp = znac_temp & 0x3ff;              // наложение маски на 3-х байтовую переменную косинуса
-                                }
-
-                                if (znac_temp == 0xffffffff && nparb[f] == 4)
-                                {
-                                    //DeviceData.Invalidate(tag, 1);
-                                    DeviceData.Invalidate(DeviceTags[tagIndex].Code, 1);
-                                }
-                                else
-                                {
-                                    //получение значения с учетом разрещшающей способности
-                                    double znac = Convert.ToDouble(znac_temp) / nbwrc[f] * prop.parkui[f];
-                                    // Значение умножается на множитель, если его нет, то он равен 1
-
-                                    //DeviceData.Set(tag, znac * Napr * SToDouble(channels[DeviceTags[tag].Code].range), 1); 
-
-                                    DeviceData.Set(DeviceTags[tagIndex].Code, znac * Napr * SToDouble(channels[DeviceTags[tagIndex].Code].range), 1); // TEST
-
-                                    Napr = 1;
-                                }
-                                tagIndex++;
                             }
-                            idxP++; // увеличиваем индекс тега в группе
-                            znx = znx + nparb[f];
+                        }
+                        else // используем команду фиксации по адресу счетчика
+                        {
+                            Request(requests.fixDataReq, 4);
                         }
                     }
-                    else
+
+                    // --------- формирование запросов P,Q,S,U,I и энергия от сброса при параметре 14h или 16h
+                    for (int f = 0; f < nbwri.Length; f++)
                     {
-                        //prop.opencnl = false; // Надо ли ?
-                        //DeviceData.Invalidate(tag, quantity);
+                        int bwrim = nbwri[f] & 0xf0;
 
-                        DeviceData.Invalidate(DeviceTags[tagIndex].Code, quantity); // TEST
+                        requests.dataReq = Protocol.DataReq(NumAddress, readparam, nbwri[f]);
 
-                        tagIndex = tagIndex + quantity;
-                    }
-                }
-            }
+                        Request(requests.dataReq, nb_length[f]);
+                        int quantity = channels[DeviceTags[tagIndex].Code].quantity; // Количество активных каналов в текущем запросе, проверенных на этапе создания каналов
 
-            //------------Получить пофазные значения накопленной энергии прямого направления  код запросв 0x05, параметр 0x60
-            if (energyL != 0)
-            {
-                for (int f = 0; f < nenergy.Length; f++)
-                {
-                    requests.energyPReq = Protocol.EnergyPReq(NumAddress, nenergy[f]);
-                    Request(requests.energyPReq, 15);
-                    int quantity = channels[DeviceTags[tagIndex].Code].quantity; // Количество активных каналов в текущем запросе, проверенных на этапе создания каналов
-
-                    // Тут проверка ответа на корректность и разбор значений
-                    if (LastRequestOK)
-                    {
-                        int idxP = 0;
-                        int znx = 1;
-                        for (int z = 0; z < 3; z++)
+                        if (LastRequestOK)
                         {
-                            if (channels[DeviceTags[tagIndex].Code].idxPar == idxP)
+                            int idxP = 0;
+                            int znx = 1;
+                            for (int zn = 0; zn < nparc[f]; zn++) // nparc[f] количество параметров в ответе для разных запросов.
                             {
-                                uint znac_temp = BitConverter.ToUInt32(inBuf, znx);
-                                znac_temp = BitFunc.ROR(znac_temp, 16);
-                                double znac = Convert.ToDouble(znac_temp) / 1000 * prop.ki;
 
-                                DeviceData.Set(DeviceTags[tagIndex], znac, 1); // TEST вместо tag
-                                tagIndex++;
+                                if (channels[DeviceTags[tagIndex].Code].idxPar == idxP)
+                                {
+                                    byte[] zn_temp = new byte[4];
+                                    uint znac_temp; // = 0; было
+
+                                    if (nparb[f] == 4)
+                                    {
+                                        Array.Copy(inBuf, znx, zn_temp, 0, nparb[f]);                       // Копирование количества байт nparb[f] во временный буфер
+                                        znac_temp = BitConverter.ToUInt32(zn_temp, 0);
+
+                                        znac_temp = BitFunc.ROR(znac_temp, 16);
+                                        if (nbwri[f] == 0x00 && (znac_temp & 0x80000000) >= 1) Napr = -1;   // определение направления Активной   мощности
+                                        if (nbwri[f] == 0x04 && (znac_temp & 0x40000000) >= 1) Napr = -1;   // определение направления Реактивной мощности
+                                        if (bwrim != 0xf0) znac_temp = znac_temp & 0x3fffffff;              // наложение маски для удаления направления для получения значения
+                                    }
+                                    else
+                                    {
+                                        Array.Copy(inBuf, znx, zn_temp, 0, 1);
+                                        Array.Copy(inBuf, znx + 1, zn_temp, 2, 2);
+                                        znac_temp = BitConverter.ToUInt32(zn_temp, 0);
+
+                                        znac_temp = BitFunc.ROR(znac_temp, 16);
+                                        if (nbwri[f] == 0x00 && (znac_temp & 0x800000) >= 1) Napr = -1;   // определение направления Активной   мощности
+                                        if (nbwri[f] == 0x04 && (znac_temp & 0x400000) >= 1) Napr = -1;   // определение направления Реактивной мощности
+                                        if (bwrim != 0xf0) znac_temp = znac_temp & 0x3fffff;              // наложение маски для удаления направления для получения значения
+                                        if (nbwri[f] == 0x30) znac_temp = znac_temp & 0x3ff;              // наложение маски на 3-х байтовую переменную косинуса
+                                    }
+
+                                    if (znac_temp == 0xffffffff && nparb[f] == 4)
+                                    {
+                                        //DeviceData.Invalidate(tag, 1);
+                                        DeviceData.Invalidate(DeviceTags[tagIndex].Code, 1);
+                                    }
+                                    else
+                                    {
+                                        //получение значения с учетом разрещшающей способности
+                                        double znac = Convert.ToDouble(znac_temp) / nbwrc[f] * prop.parkui[f];
+                                        // Значение умножается на множитель, если его нет, то он равен 1
+
+                                        //DeviceData.Set(tag, znac * Napr * SToDouble(channels[DeviceTags[tag].Code].range), 1); 
+
+                                        DeviceData.Set(DeviceTags[tagIndex].Code, znac * Napr * SToDouble(channels[DeviceTags[tagIndex].Code].range), 1); // TEST
+
+                                        Napr = 1;
+                                    }
+                                    tagIndex++;
+                                }
+                                idxP++; // увеличиваем индекс тега в группе
+                                znx = znx + nparb[f];
                             }
-                            idxP++;
-                            znx = znx + 4;
+                        }
+                        else
+                        {
+                            //prop.opencnl = false; // Надо ли ?
+                            //DeviceData.Invalidate(tag, quantity);
+
+                            DeviceData.Invalidate(DeviceTags[tagIndex].Code, quantity); // TEST
+
+                            tagIndex = tagIndex + quantity;
                         }
                     }
-                    else
+                }
+
+                //------------Получить пофазные значения накопленной энергии прямого направления  код запросв 0x05, параметр 0x60
+                if (energyL != 0)
+                {
+                    for (int f = 0; f < nenergy.Length; f++)
                     {
-                        DeviceData.Invalidate(DeviceTags[tagIndex].Code, quantity); // 3   TEST вместо tag
-                        tagIndex = tagIndex + quantity;
+                        requests.energyPReq = Protocol.EnergyPReq(NumAddress, nenergy[f]);
+                        Request(requests.energyPReq, 15);
+                        int quantity = channels[DeviceTags[tagIndex].Code].quantity; // Количество активных каналов в текущем запросе, проверенных на этапе создания каналов
+
+                        // Тут проверка ответа на корректность и разбор значений
+                        if (LastRequestOK)
+                        {
+                            int idxP = 0;
+                            int znx = 1;
+                            for (int z = 0; z < 3; z++)
+                            {
+                                if (channels[DeviceTags[tagIndex].Code].idxPar == idxP)
+                                {
+                                    uint znac_temp = BitConverter.ToUInt32(inBuf, znx);
+                                    znac_temp = BitFunc.ROR(znac_temp, 16);
+                                    double znac = Convert.ToDouble(znac_temp) / 1000 * prop.ki * prop.ku; // TEST добавлен ku
+
+                                    DeviceData.Set(DeviceTags[tagIndex], znac, 1); // TEST вместо tag
+                                    tagIndex++;
+                                }
+                                idxP++;
+                                znx = znx + 4;
+                            }
+                        }
+                        else
+                        {
+                            DeviceData.Invalidate(DeviceTags[tagIndex].Code, quantity); // 3   TEST вместо tag
+                            tagIndex = tagIndex + quantity;
+                        }
                     }
                 }
-            }
 
-            //Чтение профилей мощностей - Вид энергии 0 (A +, A -, R +, R -)
-            if (ActiveProfile)
-            {
-                DateTime dt = DateTime.Now;
-                if (dt.Subtract(prop.srezDt) > TimeSpan.FromMinutes(srezPeriod) || firstAProfile)
+                //Чтение профилей мощностей - Вид энергии 0 (A +, A -, R +, R -)
+                if (ActiveProfile)
                 {
-                    if (profile.Count > 0)
+                    DateTime dt = DateTime.Now;
+                    if (dt.Subtract(prop.srezDt) > TimeSpan.FromMinutes(srezPeriod) || firstAProfile)
                     {
-                        Request(Protocol.WriteCompReq(NumAddress, 0x08, 0x13), 12); // Чтение последней записи среза мощностей
-                        if (LastRequestOK && ToLogString(code) == "")
+                        if (profile.Count > 0)
                         {
-                            // -------Определить дату последней записи профиля средних мощностей ---------
-                            dt = new DateTime(2000 + (int)ConvFunc.BcdToDec(new byte[] { inBuf[8] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[7] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[6] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[4] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[5] }), 0);
-
-                            srezPeriod = inBuf[9]; // Проверка периода среза и запись значения в переменную, по умолчанию 30 минут
-
-                            // Последняя ячейка памяти записи средней мощности
-                            byte[] NumCell = new byte[2];
-                            Array.Copy(inBuf, 1, NumCell, 0, 2);
-                            Array.Reverse(NumCell);
-                            // Адрес последней ячейки памяти
-                            int ramstart = BitConverter.ToUInt16(NumCell, 0) * 16;
-
-                            // Пока только Вид энергии 0 (A+, A-, R+, R-)
-                            requests.readRomReq = Protocol.ReadRomReq(NumAddress, 0, 3, ramstart, 15); // прочитать последнюю запись, 15 байт
-                            Request(requests.readRomReq, 18); // Чтение ROM
-
-                            if (LastRequestOK)
+                            Request(Protocol.WriteCompReq(NumAddress, 0x08, 0x13), 12); // Чтение последней записи среза мощностей
+                            if (LastRequestOK && ToLogString(code) == "")
                             {
-                                DateTime nowDt = DateTime.Now;
-                                // Обработка профилей мощности
-                                int znx = 8;
-                                // Определение статуса среза средниих мощностей false = Архивный (Полный срез), true = Неполный срез, номер задается
-                                // параметром шаблона halfArchStat, необходимо предварительно создать Номер и цвет в Проект - Вспомогательные таблицы - Статусы каналов 
-                                bool halfSrez = (inBuf[1] & 0x02) > 0;
-                                int cnlStat = halfSrez ? halfArch : 2;
+                                // -------Определить дату последней записи профиля средних мощностей ---------
+                                dt = new DateTime(2000 + (int)ConvFunc.BcdToDec(new byte[] { inBuf[8] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[7] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[6] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[4] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[5] }), 0);
+
+                                srezPeriod = inBuf[9]; // Проверка периода среза и запись значения в переменную, по умолчанию 30 минут
+
+                                // Последняя ячейка памяти записи средней мощности
+                                byte[] NumCell = new byte[2];
+                                Array.Copy(inBuf, 1, NumCell, 0, 2);
+                                Array.Reverse(NumCell);
+                                // Адрес последней ячейки памяти
+                                int ramstart = BitConverter.ToUInt16(NumCell, 0) * 16;
+
+                                // Пока только Вид энергии 0 (A+, A-, R+, R-)
+                                requests.readRomReq = Protocol.ReadRomReq(NumAddress, 0, 3, ramstart, 15); // прочитать последнюю запись, 15 байт
+                                Request(requests.readRomReq, 18); // Чтение ROM
+
+                                if (LastRequestOK)
+                                {
+                                    DateTime nowDt = DateTime.Now;
+                                    // Обработка профилей мощности
+                                    int znx = 8;
+                                    // Определение статуса среза средниих мощностей false = Архивный (Полный срез), true = Неполный срез, номер задается
+                                    // параметром шаблона halfArchStat, необходимо предварительно создать Номер и цвет в Проект - Вспомогательные таблицы - Статусы каналов 
+                                    bool halfSrez = (inBuf[1] & 0x02) > 0;
+                                    int cnlStat = halfSrez ? halfArch : 2;
 
 
-                                // TEST TEST 
+                                    // TEST TEST 
 
-                                //Log.WriteLine($" {nowDt.Subtract(dt) > TimeSpan.FromMinutes(0)}    {nowDt.Subtract(dt) < TimeSpan.FromMinutes(srezPeriod)}");
+                                    //Log.WriteLine($" {nowDt.Subtract(dt) > TimeSpan.FromMinutes(0)}    {nowDt.Subtract(dt) < TimeSpan.FromMinutes(srezPeriod)}");
 
-                                // TEST TEST 
+                                    // TEST TEST 
 
 
-                                //if (nowDt.Subtract(dt) > TimeSpan.FromMinutes(0) && (nowDt.Subtract(dt) < TimeSpan.FromMinutes(srezPeriod)))
-                                //{
-                                double second = saveTime != 0 ? nowDt.Subtract(dt).TotalSeconds : 0;
+                                    //if (nowDt.Subtract(dt) > TimeSpan.FromMinutes(0) && (nowDt.Subtract(dt) < TimeSpan.FromMinutes(srezPeriod)))
+                                    //{
+                                    double second = saveTime != 0 ? nowDt.Subtract(dt).TotalSeconds : 0;
                                     DateTime writeDt = dt;
                                     double tme = 0;
-                                    string archMask = string.IsNullOrEmpty(devTemplate.ArchMask) ? "" : devTemplate.ArchMask; 
+                                    string archMask = string.IsNullOrEmpty(devTemplate.ArchMask) ? "" : devTemplate.ArchMask;
 
                                     bool dataset = false;
                                     if (archMask == "")
@@ -1102,7 +1123,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
 
                                                 // Запись в текущие промежутки последней записи если время saveTime не равно 0, тогда запись в точку времени среза
                                                 if (!dataset) DeviceData.Set(DeviceTags[profile[pf].code], prof * profile[pf].range, cnlStat); // Надо по коду тега ????? DeviceData.Set(DeviceTags[profile[pf].code].DataIndex, prof * profile[pf].range, cnlStat)
-                                        }
+                                            }
                                             dataset = true; // Отправляем DeviceData.Set один раз
                                             slice.Descr = "Запись ср. мощностей " + nowDt.ToString();
                                             DeviceData.EnqueueSlice(slice);
@@ -1126,7 +1147,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                                             slice.CnlData[pf] = new CnlData(prof * profile[pf].range, cnlStat);
 
                                             DeviceData.Set(DeviceTags[profile[pf].code], prof * profile[pf].range, cnlStat); // TEST Текущие данные профилей средних мощностей DeviceTags[profile[pf].code].DataIndex
-                                    }
+                                        }
 
                                         slice.Descr = "Запись ср. мощностей " + nowDt.ToString();
                                         DeviceData.EnqueueSlice(slice);
@@ -1137,83 +1158,82 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                                     prop.srezDt = dt;
                                     prop.saveParam.arcDt = prop.srezDt.ToString(); // prop.srezDt.ToString()
                                     SaveSettings();
+                                    //}
+                                }
+                                //else
+                                //{
+                                //    if (inBuf[1] == 0x05) prop.opencnl = false;
                                 //}
                             }
-                            //else
-                            //{
-                            //    if (inBuf[1] == 0x05) prop.opencnl = false;
-                            //}
-                        }
-                        else
-                        {
-                            string message = string.Format(Locale.IsRussian ?
-                                        "Ошибка: {0}" :
-                                        "Error: {0}", ToLogString(code));
-                            Log.WriteLine(message);
-
-                            if (inBuf[1] == 0x05)
+                            else
                             {
-                                prop.opencnl = false;
+                                string message = string.Format(Locale.IsRussian ?
+                                            "Ошибка: {0}" :
+                                            "Error: {0}", ToLogString(code));
+                                Log.WriteLine(message);
+
+                                if (inBuf[1] == 0x05)
+                                {
+                                    prop.opencnl = false;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // У статуса и коэффициентов фиксированные номера сигналов
-            // Статус передаем всегда на случай потери связи
-            // при потери связи переменная открытия канала сбрасывается
-            // Чтение последней записи журнала кода состояния прибора
-            if (readstatus) DeviceData.Set("error", code, 1);
+                // У статуса и коэффициентов фиксированные номера сигналов
+                // Статус передаем всегда на случай потери связи
+                // при потери связи переменная открытия канала сбрасывается
+                // Чтение последней записи журнала кода состояния прибора
+                if (readstatus) DeviceData.Set("error", code, 1);
 
-            if (readstatus && prop.opencnl)
-            {
-                DeviceData.Set("kI", prop.ki, 1);
-                DeviceData.Set("kU", prop.ku, 1);
-
-                Request(requests.wordStatReq, 16);
-                if (LastRequestOK)
+                if (readstatus && prop.opencnl)
                 {
-                    Array.Copy(inBuf, 7, wordStat, 4, 2);
-                    Array.Copy(inBuf, 9, wordStat, 2, 2);
-                    Array.Copy(inBuf, 11, wordStat, 0, 2);
-                    DeviceData.Set("wordSt", BitConverter.ToUInt64(wordStat, 0), 1);
-                }
-                else
-                {
-                    DeviceData.Invalidate("wordSt", 1);
-                }
-            }
+                    DeviceData.Set("kI", prop.ki, 1);
+                    DeviceData.Set("kU", prop.ku, 1);
 
-            bool change = chan_err(code);
-
-            if (readstatus && change)
-            {
-                // генерация события
-                DeviceEvent status = new DeviceEvent(DeviceTags["error"]);
-
-                int even = 21;               // Зеленый цвет события
-                status.Descr = "Связь восстановлена"; // в логе Коммуникатора
-                status.Text = "Связь восстановлена";
-
-                if (code != 0)
-                {
-                    even = 23;    // Красный цвет события
-                    status.Descr = "Потеря связи";  // в логе Коммуникатора
-                    status.Text = "Потеря связи";
+                    Request(requests.wordStatReq, 16);
+                    if (LastRequestOK)
+                    {
+                        Array.Copy(inBuf, 7, wordStat, 4, 2);
+                        Array.Copy(inBuf, 9, wordStat, 2, 2);
+                        Array.Copy(inBuf, 11, wordStat, 0, 2);
+                        DeviceData.Set("wordSt", BitConverter.ToUInt64(wordStat, 0), 1);
+                    }
+                    else
+                    {
+                        DeviceData.Invalidate("wordSt", 1);
+                    }
                 }
 
-                status.Ack = false;
-                status.TextFormat = EventTextFormat.CustomText; // EventTextFormat.CustomText
-                status.Timestamp = DateTime.UtcNow;
-                status.CnlStat = even;
-                status.CnlVal = code;
+                bool change = chan_err(code);
 
-                DeviceData.EnqueueEvent(status);
-                code_err = code;
+                if (readstatus && change)
+                {
+                    // генерация события
+                    DeviceEvent status = new DeviceEvent(DeviceTags["error"]);
+
+                    int even = 21;               // Зеленый цвет события
+                    status.Descr = "Связь восстановлена"; // в логе Коммуникатора
+                    status.Text = "Связь восстановлена";
+
+                    if (code != 0)
+                    {
+                        even = 23;    // Красный цвет события
+                        status.Descr = "Потеря связи";  // в логе Коммуникатора
+                        status.Text = "Потеря связи";
+                    }
+
+                    status.Ack = false;
+                    status.TextFormat = EventTextFormat.CustomText; // EventTextFormat.CustomText
+                    status.Timestamp = DateTime.UtcNow;
+                    status.CnlStat = even;
+                    status.CnlVal = code;
+
+                    DeviceData.EnqueueEvent(status);
+                    code_err = code;
+                }
             }
-
-            //tagIndex = 0;
 
             LineContext.SharedData[address] = prop; // записать данные в общие свойства
 
@@ -1246,7 +1266,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 // Определить уровень команды, пользовательский или администратора
                 // Если основной уровень 1 - пользователь, а команда с уровнем 2 - Админ, 
                 // закрываем канал, открываем с уровнем администратора
-                if (Level != "2" && channels[cmdCode].Mode == 2) // cmdNum
+                if (Level != "2" && channels[cmdCode].Mode == 2 || Level.ToLower() != "admin" && channels[cmdCode].Mode == 2) // cmdNum
                 {
                     Request(requests.closeCnlReq, 4); // закрытие канала
                     if (LastRequestOK)
@@ -1347,7 +1367,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 }
             }
 
-            if (Level != "2" && channels[cmdCode].Mode == 2)
+            if (Level != "2" && channels[cmdCode].Mode == 2 || Level.ToLower() != "admin" && channels[cmdCode].Mode == 2)
             {
                 // После выполнения команды Администратором закрываем канал
                 // в следующей сессии канал откроется с заданным уровнем доступа
@@ -1404,7 +1424,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                             Code = devTemplate.SndGroups[idgr].value[i].code,
                             Mode = 1,
                             CnlType = CnlTypeID.Input,
-                            range = string.IsNullOrEmpty(devTemplate.SndGroups[idgr].value[i].range) ? "1" : devTemplate.SndGroups[idgr].value[i].range,
+                            range = string.IsNullOrEmpty(devTemplate.SndGroups[idgr].value[i].multiplier) ? "1" : devTemplate.SndGroups[idgr].value[i].multiplier,
                             idxPar = i,
                             quantity = quantity // В каждой переменной группы указываем quantity хотя достаточно для первой
                         });
