@@ -89,5 +89,6 @@ namespace Scada.Comm.Drivers.DrvMercury23x.View
         {
             return new DevMercury23xView(this, lineConfig, deviceConfig);
         }
+
     }
 }
