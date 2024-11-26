@@ -1,29 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
 	  <UseWindowsForms>true</UseWindowsForms>
 	  <ImplicitUsings>enable</ImplicitUsings>
 	  <RootNamespace>Scada.Comm.Drivers.DrvMercury23x.View</RootNamespace>
-	  <Version>6.0.0</Version>
+	  <Version>6.3.0.2</Version>
     <Nullable>disable</Nullable>
+    <AssemblyVersion>6.3.0.2</AssemblyVersion>
+    <FileVersion>6.3.0.2</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="ScadaCommCommon">
-      <HintPath>..\..\scada-v6-dll\ScadaCommCommon.dll</HintPath>
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommCommon.dll</HintPath>
     </Reference>
     <Reference Include="ScadaCommFunc">
-      <HintPath>..\..\scada-v6-dll\ScadaCommFunc.dll</HintPath>
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommFunc.dll</HintPath>
     </Reference>
     <Reference Include="ScadaCommon">
-      <HintPath>..\..\scada-v6-dll\ScadaCommon.dll</HintPath>
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommon.dll</HintPath>
     </Reference>
     <Reference Include="ScadaCommon.Forms">
-      <HintPath>..\..\scada-v6-dll\ScadaCommon.Forms.dll</HintPath>
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommon.Forms.dll</HintPath>
     </Reference>
     <Reference Include="ScadaCommon.Log">
-      <HintPath>..\..\scada-v6-master\ScadaCommon\ScadaCommon.Log\bin\Release\netstandard2.0\ScadaCommon.Log.dll</HintPath>
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommon.Log.dll</HintPath>
     </Reference>
   </ItemGroup>
 
