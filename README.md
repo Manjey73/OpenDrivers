@@ -5,4 +5,5 @@
 3. DrvMercury23x  - драйвер счетчиков Меркурий серий 230, 234, 236 ![DrvMercury23x](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvMercury23x_6.4.1.4/total)
 4. DrvPulsar      - драйвер приборов Пульсар ![DrvPulsar](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvPulsar/total)
 5. DrvLogika      - драйвер приборов АО НПФ Логика ![DrvLogika](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvLogika_6.4.1.4/total)
-6. ScadaCommFunc  - дополнительные функции при реализации драйверов
+6. DrvSmsBu       - Драйвер SMS (модернизация для приема SMS) ![DrvSmsBu](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvSmsBu_6301/total) ![DrvSmsBu](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvSmsBu/total)
+7. ScadaCommFunc  - дополнительные функции при реализации драйверов
