@@ -46,7 +46,6 @@ namespace Scada.Comm.Drivers.DrvBetarV12.Logic
         {
 
             reqAddr = ReadReq(NumAddress); 
-            //Log.WriteLine($"NumAddress {NumAddress}"); // TEST TEST
         }
 
 
@@ -86,25 +85,18 @@ namespace Scada.Comm.Drivers.DrvBetarV12.Logic
             Array.Copy(inBuf, offset, val, 0, 4);
             Array.Reverse(val);
             double zDec = ((double)ConvFunc.BcdToDec(val)) / 1000;
-
-            //Log.WriteLine($"Значение Dec = {zDec}"); // TEST TEST
-
             return zDec;
         }
 
         private double GetMagneticTime(int offset)
         {
             double zDec = BitConverter.ToUInt32(inBuf, offset);
-
-            //Log.WriteLine($"Значение Magnetic = {zDec}"); // TEST TEST
             return zDec;
         }
 
         private double GetService(int offset)
         {
             double zDec = inBuf[offset];
-
-            //Log.WriteLine($"Значение Dec = {zDec}");  // TEST TEST
             return zDec;
         }
 
@@ -120,12 +112,6 @@ namespace Scada.Comm.Drivers.DrvBetarV12.Logic
 
                 ReadAnswer(inBuf, 19, out logText);
                 Log.WriteLine(logText);
-
-                // TEST
-                //read_cnt = 19;
-                //inBuf = [0x5A, 0x00, 0xBC, 0x61, 0x4E, 0x91, 0x45, 0x08, 0x00, 0x67, 0x23, 0x02, 0x00, 0x28, 0x23, 0x00, 0x00, 0x00, 0x20];
-                //Log.WriteLine(BuildReadLogText(inBuf, 0, 19, ProtocolFormat.Hex));
-                // TEST
 
                 checkRead();
 
@@ -188,6 +174,5 @@ namespace Scada.Comm.Drivers.DrvBetarV12.Logic
             return $"{CommPhrases.ReceiveNotation} ({readCnt}): " +
                 ScadaUtils.BytesToString(buffer, offset, readCnt, format == ProtocolFormat.Hex);
         }
-
     }
 }
