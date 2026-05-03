@@ -7,4 +7,4 @@
 5. DrvLogika      - драйвер приборов АО НПФ Логика ![DrvLogika](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvLogika_6.4.1.5/total)
 6. DrvSmsBu       - Драйвер SMS (модернизация для приема SMS) ![DrvSmsBu](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvSmsBu_6301/total) ![DrvSmsBu](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvSmsBu/total)
 7. ScadaCommFunc  - дополнительные функции при реализации драйверов
-8. DrvBetarV12    - драйвер счетчиков воды Бетар СХВЭ, СГВЭ с интерфейсом RS485 ![DrvLogika](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvBetarV12_6.4.0.0/total)
+8. DrvBetarV12    - драйвер счетчиков воды Бетар СХВЭ, СГВЭ с интерфейсом RS485 ![DrvLogika](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvBetarV12 6.4.0.0/total)
