@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+	<Authors>Andrey Burakhin</Authors>
+	<AssemblyVersion>6.4.0.0</AssemblyVersion>
+	<FileVersion>1.0.0.0</FileVersion>
+	<Version>6.4.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="ScadaCommCommon">
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommon">
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommon.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommon.Forms">
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommon.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="ScadaCommon.Log">
+      <HintPath>..\..\..\scada-v6-dll\ScadaCommon.Log.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
