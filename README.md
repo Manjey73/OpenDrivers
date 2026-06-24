@@ -8,3 +8,4 @@
 6. DrvSmsBu       - Драйвер SMS (модернизация для приема SMS) ![DrvSmsBu](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvSmsBu_6301/total) ![DrvSmsBu](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvSmsBu/total)
 7. ScadaCommFunc  - дополнительные функции при реализации драйверов
 8. DrvBetarV12    - драйвер счетчиков воды Бетар СХВЭ, СГВЭ с интерфейсом RS485 ![DrvBetarV12](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvBetarV12_v6.4.0.0/total)
+9. DrvRodosBu     - драйвер Ethernet реле RODOS, управление через http POST запросы ![DrvRodosBu](https://img.shields.io/github/downloads/Manjey73/OpenDrivers/DrvRodosBu_v6.4/total)
