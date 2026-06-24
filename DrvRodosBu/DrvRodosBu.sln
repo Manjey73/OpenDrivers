@@ -1,0 +1,38 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37216.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrvRodosBu.Logic", "DrvRodosBu.Logic\DrvRodosBu.Logic.csproj", "{9F3C34EE-E9CB-49E8-9A16-861BF41CDE5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrvRodosBu.View", "DrvRodosBu.View\DrvRodosBu.View.csproj", "{8FA4E17E-776B-453D-A730-080EA64FEDB9}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DrvRodosBu.Shared", "DrvRodosBu.Shared\DrvRodosBu.Shared.shproj", "{520F344A-2317-4A07-AF05-3E9B2C0FB94D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F3C34EE-E9CB-49E8-9A16-861BF41CDE5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F3C34EE-E9CB-49E8-9A16-861BF41CDE5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F3C34EE-E9CB-49E8-9A16-861BF41CDE5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F3C34EE-E9CB-49E8-9A16-861BF41CDE5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FA4E17E-776B-453D-A730-080EA64FEDB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FA4E17E-776B-453D-A730-080EA64FEDB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FA4E17E-776B-453D-A730-080EA64FEDB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FA4E17E-776B-453D-A730-080EA64FEDB9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A3C69686-8DA1-4BEE-947E-FF49E13EAB82}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DrvRodosBu.Shared\DrvRodosBu.Shared.projitems*{520f344a-2317-4a07-af05-3e9b2c0fb94d}*SharedItemsImports = 13
+		DrvRodosBu.Shared\DrvRodosBu.Shared.projitems*{8fa4e17e-776b-453d-a730-080ea64fedb9}*SharedItemsImports = 5
+		DrvRodosBu.Shared\DrvRodosBu.Shared.projitems*{9f3c34ee-e9cb-49e8-9a16-861bf41cde5a}*SharedItemsImports = 5
+	EndGlobalSection
+EndGlobal
