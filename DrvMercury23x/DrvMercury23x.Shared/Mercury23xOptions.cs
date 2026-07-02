@@ -21,6 +21,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x
             UserPwd = options.GetValueAsString("UserPassword");
             AdminPwd = options.GetValueAsString("AdminPassword");
             Level = options.GetValueAsString("Level");
+            UseAscii = options.GetValueAsString("UseAscii");
         }
 
         //var category = Locale.IsRussian ? "Доступ" : "Access";
@@ -34,6 +35,10 @@ namespace Scada.Comm.Drivers.DrvMercury23x
         [Description("Уровень доступа, допустимые значения:\n1 или user; 2 или admin"), Category("Доступ")]
         public string Level { get; set; }
 
+        [Description("Использовать Ascii в пароле, допустимые значения:\ntrue; false"), Category("Доступ")]
+        public string UseAscii { get; set; }
+
+
         /// <summary>
         /// Adds the options to the list.
         /// </summary>
@@ -44,6 +49,8 @@ namespace Scada.Comm.Drivers.DrvMercury23x
             options["UserPassword"] = UserPwd;
             options["AdminPassword"] = AdminPwd;
             options["Level"] = Level;
+            options["UseAscii"] = UseAscii;
+
         }
 
     }
