@@ -18,15 +18,18 @@ namespace Scada.Comm.Drivers.DrvMercury23x
             return testCnl;
         }
 
-        public static byte[] OpenCnlReq(int devAddr, string uroven, string pass)
+        public static byte[] OpenCnlReq(int devAddr, string uroven, string pass, bool ascii)
         {
+            int asciiByte = 48;
+            if (ascii) asciiByte = 0;
+
             byte[] temp_pass = new byte[4];
             byte[] buf_pass = Encoding.ASCII.GetBytes(pass);
 
             for (int f = 0; f < 6; f++)
             {
                 Array.Copy(buf_pass, f, temp_pass, 0, 1);
-                int temp_int = BitConverter.ToInt32(temp_pass, 0) - 48;
+                int temp_int = BitConverter.ToInt32(temp_pass, 0) - asciiByte;
                 temp_pass = BitConverter.GetBytes(temp_int);
                 Array.Copy(temp_pass, 0, buf_pass, f, 1);
             }
