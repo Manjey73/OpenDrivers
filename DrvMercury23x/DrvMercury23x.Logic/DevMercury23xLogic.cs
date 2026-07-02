@@ -6,11 +6,12 @@ using Scada.Comm.Channels;
 using Scada.Comm.Config;
 using Scada.Comm.Devices;
 using Scada.Comm.Lang;
+using Scada.Data.Const;
 using Scada.Data.Models;
 using Scada.Lang;
 using ScadaCommFunc;
 using System.Diagnostics;
-using Scada.Data.Const;
+using System.Text;
 
 
 namespace Scada.Comm.Drivers.DrvMercury23x.Logic
@@ -20,8 +21,12 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         private readonly Mercury23xOptions options;         // the tester options
         private readonly string UserPwd;                    // Пароль 1-го уровня доступа
         private readonly string AdminPwd;                   // Пароль 2-го уровня доступа
+        private readonly bool UseAscii;                     // Использовать Ascii в пароле
 
         private DevTemplate devTemplate = new DevTemplate();
+
+        private int forEmpty = 1; // TEST
+        private string nCode;
 
         private int read_cnt = 0;
         private string fileName = "";
@@ -36,6 +41,18 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         private bool ActiveProfile = false;
         private bool firstAProfile = true;
 
+        private DateTime dtold;
+        private TimeSpan ts = new TimeSpan();
+        private int verifiStat = 1;
+        private int fday;
+        private int sday;
+        private int ln; // Длина цифр в имене файла
+        private bool re = false;
+
+        private string lineNum;
+        private string devNum;
+        private string addrNum;
+
         // TEST TEST TEST
         private bool settLoaded;   // загрузка настроек выполнена
                                    //private DateTime hrBegDT;  // дата и час начала часовых архивов
@@ -45,34 +62,34 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                                    // TEST TEST TEST
 
 
-
         private Requests requests = new Requests();
+
+        #region InitRequests
         private void InitRequests()
         {
             requests.testCnlReq = Protocol.TestCnlReq(NumAddress);
 
-
             if (Level == "1" || Level.ToLower() == "user")
             {
-                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "1", UserPwd);
+                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "1", UserPwd, UseAscii);
             }
             else if ( Level == "2" || Level.ToLower() == "admin")
             {
-                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "2", AdminPwd);
+                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "2", AdminPwd, UseAscii);
             }
             else
             {
-                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "1", UserPwd);
+                requests.openCnlReq = Protocol.OpenCnlReq(NumAddress, "1", UserPwd, UseAscii);
             }
 
-            requests.openAdmReq = Protocol.OpenCnlReq(NumAddress, "2", AdminPwd);
+            requests.openAdmReq = Protocol.OpenCnlReq(NumAddress, "2", AdminPwd, UseAscii);
             requests.closeCnlReq = Protocol.WriteComReq(NumAddress, 0x02);
             requests.readTimeReq = Protocol.WriteCompReq(NumAddress, 0x04, 0x00);
-            requests.lastSyncReq = Protocol.WriteCompReq(NumAddress, 0x04, 0x02, new byte[] { 0xFF }); // Чтение последней записи журнала синхронизации времени
+            requests.lastSyncReq = Protocol.WriteCompReq(NumAddress, 0x04, 0x02, [ 0xFF ]); // Чтение последней записи журнала синхронизации времени
             requests.kuiReq = Protocol.KuiReq(NumAddress);
             requests.infoReq = Protocol.InfoReq(NumAddress);
             requests.curTimeReq = Protocol.CurTimeReq(NumAddress);
-            requests.wordStatReq = Protocol.WriteCompReq(NumAddress, 0x04, 0x14, new byte[] { 0xFF }); // Чтение последней записи журнала кода словосостояния прибора
+            requests.wordStatReq = Protocol.WriteCompReq(NumAddress, 0x04, 0x14, [ 0xFF ]); // Чтение последней записи журнала кода словосостояния прибора
 
             // Формирование запроса фиксации данных в зависимости от параметра multicast
             if (devTemplate.multicast)
@@ -84,6 +101,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 requests.fixDataReq = Protocol.FixDataReq(NumAddress);
             }
         }
+        #endregion InitRequests
 
         public static long Ticks() // возвращает время в миллисекундах
         {
@@ -92,6 +110,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             return time;
         }
 
+        #region MyDevice
         public class MyDevice                   // переменные для устройств на линии связи
         {
             public SaveParam saveParam = new SaveParam();
@@ -113,13 +132,15 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             public DateTime made;               // Дата изготовления
             public DateTime srezDt;             // Дата чтения архива
             public DateTime LastSyncDt;         // Время последней синхронизации в приборе
+            public DateTime VerifiDt;           // дата поверки прибора
 
             public override string ToString()
             {
-                string outprops = string.Concat("SN_", serial.ToString(), " Изготовлен ", made.ToString("dd.MM.yyyy"), " Время архива ", srezDt.ToString());
+                string outprops = string.Concat("SN_", serial.ToString(), " Изготовлен ", made.ToString("d"), " Дата поверки ", VerifiDt.ToString("d"), " Время архива ", srezDt.ToString()); // TEST "dd.MM.yyyy"
                 return outprops;
             }
         }
+        #endregion MyDevice
 
         protected virtual string address
         {
@@ -143,9 +164,6 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             return devaddr;
         }
 
-
-
-
         public static string ToLogString(byte errcode)
         {
             string logs = "";
@@ -159,6 +177,20 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             }
             return logs;
         }
+
+        #region День, Дня, Дней
+        public static string ToDaysStr(int day, int tsday)
+        {
+            string days = "";
+            switch (day)
+            {
+                case int n when n == 1 : days = Locale.IsRussian ? $"Срок поверки счетчика: остался {tsday} день" : $"The verification period of the device: {tsday} day left"; break;
+                case int n when n >= 2 && n <= 4: days = Locale.IsRussian ? $"Срок поверки счетчика: осталось {tsday} дня" : $"The verification period of the device: there are {tsday} days left"; break;
+                default: days = Locale.IsRussian ? $"Срок поверки счетчика: осталось {tsday} дней" : $"The verification period of the device: there are {tsday} days left"; break;
+            }
+            return days;
+        }
+        #endregion День, Дня, Дней
 
         public static int ConstA(byte aconst)
         {
@@ -224,11 +256,11 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         // 0x50 - Угол м-ду ф. 1 и 2, 1 и 3, 2 и 3                  (градусы)
 
         // F0,-,F4 - Зафиксированная энергия от сброса
-        private int[] bwri_14 = new int[] { 0x00, 0x04, 0x08, 0x30, 0x10, 0x20, 0x50, 0x40, 0xF0, 0xF1, 0xF2, 0xF3, 0xF4 }; // BWRI для запроса параметром 14h
-        private int[] bwrc_14 = new int[] { 100, 100, 100, 1000, 100, 1000, 100, 100, 1000, 1000, 1000, 1000, 1000 }; // Разрешающая способность регистров хранения 
-        private int[] b_length_14 = new int[] { 19, 19, 19, 15, 12, 12, 12, 6, 19, 19, 19, 19, 19 };   // количество байт в ответе счетчика
-        private int[] parb_14 = new int[] { 4, 4, 4, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 };    // количество байт в параметре ответа (4 или 3)
-        private int[] parc_14 = new int[] { 4, 4, 4, 4, 3, 3, 3, 1, 4, 4, 4, 4, 4 };    // количество параметров в ответе (4, 3 или 1)
+        private int[] bwri_14 = { 0x00, 0x04, 0x08, 0x30, 0x10, 0x20, 0x50, 0x40, 0xF0, 0xF1, 0xF2, 0xF3, 0xF4 }; // BWRI для запроса параметром 14h
+        private int[] bwrc_14 = { 100, 100, 100, 1000, 100, 1000, 100, 100, 1000, 1000, 1000, 1000, 1000 }; // Разрешающая способность регистров хранения 
+        private int[] b_length_14 = { 19, 19, 19, 15, 12, 12, 12, 6, 19, 19, 19, 19, 19 };   // количество байт в ответе счетчика
+        private int[] parb_14 = { 4, 4, 4, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4 };    // количество байт в параметре ответа (4 или 3)
+        private int[] parc_14 = { 4, 4, 4, 4, 3, 3, 3, 1, 4, 4, 4, 4, 4 };    // количество параметров в ответе (4, 3 или 1)
 
         // Массив значений параметров BWRI счетчика + 'энергии от сброса для чтения параметром 16h
         // Команды BWRI для запроса 16h:
@@ -248,7 +280,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         private int[] parc_16 = { 4, 4, 4, 4, 3, 3, 3, 1, 4, 4, 4, 4, 4 };    // количество параметров в ответе (4, 3 или 1)
 
         // Массив значений энергии по фазам прямого направления и чтения энергии от сброса функцией 0x05 при чтении счетчика параметром 16h кода функции 0x08
-        private int[] massenergy = new int[] { 0, 1, 2, 3, 4 };
+        private int[] massenergy = { 0, 1, 2, 3, 4 };
 
         private bool newmass = false;
         private bool newenergy = false;
@@ -261,6 +293,10 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         private int[] nparc = new int[1];
         private int[] nenergy = new int[1];
         private bool readstatus = false;    // Читать статус счетчика
+
+        private bool monthEv = false;
+        private bool halfEv = false;
+
         private byte code_err = 0x0;
         private byte code = 0x0;
         private int Napr = 1;               // Направление Активной или Реактивной мощности 1 = прямое (бит направления = 0), при обратном значение = -1
@@ -292,7 +328,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         // Выполняем действия при добавлении Линии связи - Чтение шаблона, создание списка Тегов
         public override void InitDeviceTags() // OnAddedToCommLine()
         {
-
+            #region Секция Мгновенные значения
             if (mgn_znac != 0)
             {
                 bool mgn_P = BitFunc.GetBit(mask_g1, 0) > 0; // Параметр Bit группы "Мощность P" должен быть равен 0 
@@ -327,7 +363,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 if (mgn_F)
                     tagcreate("Мгновенные значения:", 7);
             }
+            #endregion Секция Мгновенные значения
 
+            #region Секция Энергия
             if (energy != 0)
             {
                 bool en_summ = BitFunc.GetBit(mask_g1, 8) > 0; // Параметр Bit группы "Сумма" должен быть равен 8
@@ -370,24 +408,37 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 if (enL_tar4)
                     tagcreate("Энергия от сброса:", 17);
             }
+            #endregion Секция Энергия
 
             if (profile.Count > 0) // Нужен индекс группы профилей ?
             {
                 //tagGroup = new TagGroup("Профили мощностей");
                 for (int p = 0; p < profile.Count; p++)
                 {
-                    channels.Add(profile[p].code,
+                    //string nCode;
+                    if (string.IsNullOrEmpty(profile[p].code)) 
+                    {
+                        nCode = $"tag_{forEmpty}";
+                        forEmpty++; // Для переменных с пустым кодом тега
+                    }
+                    else nCode =  profile[p].code;
+
+                    //string nCode = string.IsNullOrEmpty(profile[p].code) ? forEmpty.ToString() : profile[p].code;
+
+                    channels.Add(nCode, // TEST profile[p].code
                         new CnlPrototypeFactory.ActiveChannel()
                         {
                             GroupName = "Профили мощностей",
                             Name = profile[p].profileName,
-                            Code = profile[p].code,
+                            Code = nCode, // profile[p].code, // Test При отсутствии кода тега указать пустую строку
                             Mode = 1,
                             CnlType = CnlTypeID.Input,
                         });
+                    //forEmpty++; // Для переменных с пустым кодом тега
                 }
             }
 
+            #region Status Section
             if (readstatus)
             {
                 channels.Add("error",
@@ -425,6 +476,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                         format = "hex",
                     });
             }
+            #endregion Status Section
 
             if (devTemplate.CmdGroups.Count > 0)
             {
@@ -435,6 +487,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     string paras = null;
                     int lendata = 0;
                     string format = "";
+                    int cnlType = CnlTypeID.Output;
 
                     if (devTemplate.CmdGroups[c].Active)
                     {
@@ -449,10 +502,18 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                         }
                         catch
                         {
-                            Log.WriteLine(string.Format(Locale.IsRussian ?
-                                "Ошибка задания кода команды. Строка команды не является Hex или пуста. Индекс CmdGroup = {0}" :
-                                "Error setting command сode. The command line is not Hex or empty. Index CmdGroup = {0}", c));
-                            errorCnt++;
+                            if (devTemplate.CmdGroups[c].Code.ToLower() == "verifidt")
+                            {
+                                cnlType = CnlTypeID.InputOutput;
+                                format = FormatCode.DateTime; // TEST
+                            }
+                            else
+                            {
+                                Log.WriteLine(string.Format(Locale.IsRussian ?
+                                    "Ошибка задания кода команды. Строка команды не является Hex или пуста. Индекс CmdGroup = {0}" :
+                                    "Error setting command сode. The command line is not Hex or empty. Index CmdGroup = {0}", c));
+                                errorCnt++;
+                            }
                         }
 
                         try
@@ -504,19 +565,29 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
 
                         if (errorCnt == 0)
                         {
-                            channels.Add(devTemplate.CmdGroups[c].Code,
+                            //string nCode = string.IsNullOrEmpty(devTemplate.CmdGroups[c].Code) ? forEmpty.ToString() : devTemplate.CmdGroups[c].Code;
+
+                            if (string.IsNullOrEmpty(devTemplate.CmdGroups[c].Code))
+                            {
+                                nCode = $"tag_{forEmpty}";
+                                forEmpty++; // Для переменных с пустым кодом тега
+                            }
+                            else nCode = devTemplate.CmdGroups[c].Code;
+
+                            channels.Add(nCode,
                                 new CnlPrototypeFactory.ActiveChannel()
                                 {
                                     GroupName = "Команды",
                                     Name = devTemplate.CmdGroups[c].Name,
-                                    Code = devTemplate.CmdGroups[c].Code,
+                                    Code = nCode, // devTemplate.CmdGroups[c].Code, // Test При отсутствии кода тега указать пустую строку
                                     setCommand = comm,
                                     scCnt = cnt_,
                                     datalen = lendata,
-                                    CnlType = CnlTypeID.Output,
+                                    CnlType = cnlType,
                                     format = format,
                                     Mode = mode_,
                                 });
+                            //forEmpty++; // Для переменных с пустым кодом тега
                         }
                     }
                 }
@@ -528,6 +599,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             }
         }
 
+        #region OnCommLineStart
         /// <summary>
         /// Выполнить действия при запуске линии связи
         /// </summary>
@@ -550,6 +622,16 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 {
                     devTemplate = FileFunc.LoadXml(typeof(DevTemplate), filePath) as DevTemplate;
                     fileyes = true;
+
+                    if (!int.TryParse(devTemplate.RemindFirst, out fday)) fday = 31;
+                    if (!int.TryParse(devTemplate.RemindSecond, out sday)) sday = 14;
+                    if (!int.TryParse(devTemplate.lenNum, out ln)) ln = 3;
+
+                    re = devTemplate.RemindEvery;
+
+                    lineNum = string.Format($"{{0:D{ln}}}", LineContext.CommLineNum);
+                    devNum = string.Format($"{{0:D{ln}}}", DeviceNum);
+                    addrNum = string.Format($"{{0:D{ln}}}", NumAddress);
                 }
                 catch (Exception err)
                 {
@@ -586,13 +668,23 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                             {
                                 if (devTemplate.ProfileGroups[i].value[k].active)
                                 {
+                                    //string nCode = string.IsNullOrEmpty(devTemplate.ProfileGroups[i].value[k].code) ? forEmpty.ToString() : devTemplate.ProfileGroups[i].value[k].code;
+
+                                    if (string.IsNullOrEmpty(devTemplate.ProfileGroups[i].value[k].code))
+                                    {
+                                        nCode = $"tag_{forEmpty}";
+                                        forEmpty++; // Для переменных с пустым кодом тега
+                                    }
+                                    else nCode = devTemplate.ProfileGroups[i].value[k].code;
+
                                     profile.Add(new Profile
                                     {
                                         profileName = devTemplate.ProfileGroups[i].value[k].name,
-                                        code = devTemplate.ProfileGroups[i].value[k].code,
+                                        code = nCode, // devTemplate.ProfileGroups[i].value[k].code, // devTemplate.ProfileGroups[i].value[k].code, // TEST
                                         range = SToDouble(devTemplate.ProfileGroups[i].value[k].multiplier),
                                         offset = k * 2
                                     });
+                                    //forEmpty++;
                                 }
                             }
                             ActiveProfile = true;
@@ -666,9 +758,13 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     prop.readInfo = t1 && t2 && t3;
 
                     bool t4 = DateTime.TryParse(prop.saveParam.arcDt, out prop.srezDt);
+
+                    bool t5 = DateTime.TryParse(prop.saveParam.verifiDt, out prop.VerifiDt);
+                    if (!t5) prop.VerifiDt = new DateTime();
                 }
             }
         }
+        #endregion OnCommLineStart
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -680,6 +776,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             UserPwd = string.IsNullOrEmpty(options.UserPwd) ? "111111" : options.UserPwd;
             AdminPwd = string.IsNullOrEmpty(options.AdminPwd) ? "222222" : options.AdminPwd;
             Level = string.IsNullOrEmpty(options.Level) ? "1" : options.Level;
+            UseAscii = string.IsNullOrEmpty(options.Level) ? false : Convert.ToBoolean(options.UseAscii);
 
             CanSendCommands = true;
             ConnectionRequired = true;
@@ -687,7 +784,6 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
 
 
         #region Session
-
         /// <summary>
         /// Performs a communication session.
         /// </summary>
@@ -741,6 +837,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 }
             }
 
+            #region TestChannel
             // Открытие канала с уровнем доступа согласно введенного пароля.
             if (prop.testcnl)
             {
@@ -754,7 +851,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     prop.tik = t2;
                 }
             }
+            #endregion TestChannel
 
+            #region TimeSync
             // Определить начало нового дня, возможна синхронизация времени или нет
             if (prop.opencnl && timeSync && DateTime.Today > prop.LastSyncDt)
             {
@@ -767,7 +866,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 if (LastRequestOK)
                 {
                     // DateTime lastSyncDt = DateTime.MinValue;
-                    DateTime lastSyncDt = new DateTime(2000 + (int)ConvFunc.BcdToDec(new byte[] { inBuf[6] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[5] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[4] }));
+                    DateTime lastSyncDt = new DateTime(2000 + (int)ConvFunc.BcdToDec([ inBuf[6] ]), (int)ConvFunc.BcdToDec([ inBuf[5] ]), (int)ConvFunc.BcdToDec([ inBuf[4] ]));
                     prop.LastSyncDt = lastSyncDt;
 
                     if (DateTime.Today > lastSyncDt)
@@ -781,7 +880,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     Request(requests.readTimeReq, 11);
                     if (LastRequestOK)
                     {
-                        DateTime readDt = new DateTime(2000 + (int)ConvFunc.BcdToDec(new byte[] { inBuf[7] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[6] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[5] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[3] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[2] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[1] }));
+                        DateTime readDt = new DateTime(2000 + (int)ConvFunc.BcdToDec([ inBuf[7] ]), (int)ConvFunc.BcdToDec([ inBuf[6] ]), (int)ConvFunc.BcdToDec([ inBuf[5] ]), (int)ConvFunc.BcdToDec([ inBuf[3] ]), (int)ConvFunc.BcdToDec([ inBuf[2] ]), (int)ConvFunc.BcdToDec([ inBuf[1] ]));
 
                         // Если время счетчика перешло на новый день
                         if (readDt > DateTime.Today)
@@ -816,7 +915,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                                 byte sec = (byte)ConvFunc.DecToBCD(second);
                                 byte min = (byte)ConvFunc.DecToBCD(minutes);
                                 byte hour = (byte)ConvFunc.DecToBCD(hours);
-                                Request(Protocol.WriteCompReq(NumAddress, 0x03, 0x0D, new byte[] { sec, min, hour }), 4, string.Format(Locale.IsRussian ? "Команда синхронизация времени" : "Time synchronization command"));
+                                Request(Protocol.WriteCompReq(NumAddress, 0x03, 0x0D, [ sec, min, hour ]), 4, string.Format(Locale.IsRussian ? "Команда синхронизация времени" : "Time synchronization command"));
                                 if (LastRequestOK)
                                 {
                                     Log.WriteLine(string.Format(Locale.IsRussian ?
@@ -839,7 +938,10 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     }
                 }
             }
+            #endregion TimeSync
 
+
+            #region Read Device Info
             // Запрос информации счетчика - Серийный номер, дата выпуска, версия ПО, вариант исполнения
             if (devTemplate.info && prop.opencnl && !prop.readInfo)
             {
@@ -861,18 +963,23 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     prop.Aconst = ConstA(inBuf[12]);                               // Сохраняем постоянну счетчика имп/квт*ч
 
                     prop.saveParam.serial = snNum.ToString();
-                    prop.saveParam.madeDt = prop.made.ToString("dd.MM.yyyy");
+                    prop.saveParam.madeDt = prop.made.ToString("d"); // TEST "dd.MM.yyyy"
                     prop.saveParam.constA = prop.Aconst.ToString();
+                    prop.saveParam.verifiDt = prop.VerifiDt.ToString("d"); // TEST "dd.MM.yyyy"
 
                     SaveSettings();
+                    prop.readInfo = true;
                 }
                 else
                 {
                     // Данные со счетчика не считаны, чтение профилей средней мощности невозможно (заделка на будущее)
+                    prop.readInfo = false;
                 }
-                prop.readInfo = true;
+                //prop.readInfo = true; // TEST 
             }
+            #endregion Read Device Info
 
+            #region Read kI/kU
             // Запрос коэффициентов трансформации напряжения и тока
             if (prop.opencnl && !prop.Kui)
             {
@@ -883,9 +990,10 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     prop.Kui = true;
                     prop.ku = Convert.ToInt32(BitFunc.ROR(BitConverter.ToUInt16(inBuf, 1), 8));
                     prop.ki = Convert.ToInt32(BitFunc.ROR(BitConverter.ToUInt16(inBuf, 3), 8));
-                    prop.parkui = new int[] { prop.ki, prop.ki, prop.ki, 1, prop.ku, prop.ki, 1, 1, prop.ki, prop.ki, prop.ki, prop.ki, prop.ki };
+                    prop.parkui = [ prop.ki, prop.ki, prop.ki, 1, prop.ku, prop.ki, 1, 1, prop.ki, prop.ki, prop.ki, prop.ki, prop.ki ];
                 }
             }
+            #endregion Read kI/kU
 
             // При закрытом канале связи не опрашивать счетчик и выйти, выставив все в невалидное состояние
             if (!prop.opencnl)
@@ -894,6 +1002,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             }
             else
             {
+                #region Read P,Q,S,U,I
                 // ------------Получить мгновенные значения P,Q,S,U,I вариант 2
                 if (readPQSUI != 0)
                 {
@@ -992,8 +1101,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
 
                                         //DeviceData.Set(tag, znac * Napr * SToDouble(channels[DeviceTags[tag].Code].range), 1); 
 
-                                        DeviceData.Set(DeviceTags[tagIndex].Code, znac * Napr * SToDouble(channels[DeviceTags[tagIndex].Code].range), 1); // TEST
-
+                                        DeviceData.Set(DeviceTags[tagIndex].Code, znac * Napr * SToDouble(channels[DeviceTags[tagIndex].Code].range), 1);
                                         Napr = 1;
                                     }
                                     tagIndex++;
@@ -1004,16 +1112,14 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                         }
                         else
                         {
-                            //prop.opencnl = false; // Надо ли ?
-                            //DeviceData.Invalidate(tag, quantity);
-
-                            DeviceData.Invalidate(DeviceTags[tagIndex].Code, quantity); // TEST
-
+                            DeviceData.Invalidate(DeviceTags[tagIndex].Code, quantity);
                             tagIndex = tagIndex + quantity;
                         }
                     }
                 }
+                #endregion Read P,Q,S,U,I
 
+                #region Read Energy
                 //------------Получить пофазные значения накопленной энергии прямого направления  код запросв 0x05, параметр 0x60
                 if (energyL != 0)
                 {
@@ -1028,7 +1134,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                         {
                             int idxP = 0;
                             int znx = 1;
-                            for (int z = 0; z < 3; z++)
+                            for (int z = 0; z < 3; z++) // z здесь возможно quantity ????
                             {
                                 if (channels[DeviceTags[tagIndex].Code].idxPar == idxP)
                                 {
@@ -1036,10 +1142,10 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                                     znac_temp = BitFunc.ROR(znac_temp, 16);
                                     double znac = Convert.ToDouble(znac_temp) / 1000 * prop.ki * prop.ku; // TEST добавлен ku
 
-                                    DeviceData.Set(DeviceTags[tagIndex], znac, 1); // TEST вместо tag
+                                    DeviceData.Set(DeviceTags[tagIndex].Code, znac, 1); // TEST вместо tag - используем Код тега
                                     tagIndex++;
                                 }
-                                idxP++;
+                                idxP++; // Вот это вот возможно требуется внутри, а в else тоже добавить Invalidate ????
                                 znx = znx + 4;
                             }
                         }
@@ -1050,7 +1156,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                         }
                     }
                 }
+                #endregion Read Energy
 
+                #region Read Profile
                 //Чтение профилей мощностей - Вид энергии 0 (A +, A -, R +, R -)
                 if (ActiveProfile)
                 {
@@ -1063,7 +1171,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                             if (LastRequestOK && ToLogString(code) == "")
                             {
                                 // -------Определить дату последней записи профиля средних мощностей ---------
-                                dt = new DateTime(2000 + (int)ConvFunc.BcdToDec(new byte[] { inBuf[8] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[7] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[6] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[4] }), (int)ConvFunc.BcdToDec(new byte[] { inBuf[5] }), 0);
+                                dt = new DateTime(2000 + (int)ConvFunc.BcdToDec( [ inBuf[8] ]), (int)ConvFunc.BcdToDec([ inBuf[7] ]), (int)ConvFunc.BcdToDec([ inBuf[6] ]), (int)ConvFunc.BcdToDec([ inBuf[4] ]), (int)ConvFunc.BcdToDec([ inBuf[5] ]), 0);
 
                                 srezPeriod = inBuf[9]; // Проверка периода среза и запись значения в переменную, по умолчанию 30 минут
 
@@ -1088,16 +1196,6 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                                     bool halfSrez = (inBuf[1] & 0x02) > 0;
                                     int cnlStat = halfSrez ? halfArch : 2;
 
-
-                                    // TEST TEST 
-
-                                    //Log.WriteLine($" {nowDt.Subtract(dt) > TimeSpan.FromMinutes(0)}    {nowDt.Subtract(dt) < TimeSpan.FromMinutes(srezPeriod)}");
-
-                                    // TEST TEST 
-
-
-                                    //if (nowDt.Subtract(dt) > TimeSpan.FromMinutes(0) && (nowDt.Subtract(dt) < TimeSpan.FromMinutes(srezPeriod)))
-                                    //{
                                     double second = saveTime != 0 ? nowDt.Subtract(dt).TotalSeconds : 0;
                                     DateTime writeDt = dt;
                                     double tme = 0;
@@ -1180,12 +1278,17 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                         }
                     }
                 }
+                #endregion Read Profile
 
                 // У статуса и коэффициентов фиксированные номера сигналов
                 // Статус передаем всегда на случай потери связи
                 // при потери связи переменная открытия канала сбрасывается
                 // Чтение последней записи журнала кода состояния прибора
-                if (readstatus) DeviceData.Set("error", code, 1);
+                if (readstatus)
+                {
+                    DeviceData.Set("error", code, 1);
+                    //DeviceData.Set("VerifiDt", prop.VerifiDt.ToOADate(), verifiStat);
+                }
 
                 if (readstatus && prop.opencnl)
                 {
@@ -1213,14 +1316,14 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     // генерация события
                     DeviceEvent status = new DeviceEvent(DeviceTags["error"]);
 
-                    int even = 21;               // Зеленый цвет события
-                    status.Descr = "Связь восстановлена"; // в логе Коммуникатора
+                    int even = 21;                          // Зеленый цвет события
+                    status.Descr = "Связь восстановлена";   // в логе Коммуникатора
                     status.Text = "Связь восстановлена";
 
                     if (code != 0)
                     {
-                        even = 23;    // Красный цвет события
-                        status.Descr = "Потеря связи";  // в логе Коммуникатора
+                        even = 23;                          // Красный цвет события
+                        status.Descr = "Потеря связи";      // в логе Коммуникатора
                         status.Text = "Потеря связи";
                     }
 
@@ -1233,6 +1336,83 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                     DeviceData.EnqueueEvent(status);
                     code_err = code;
                 }
+
+
+                #region Test Data Verification
+                if (channels.ContainsKey("VerifiDt"))
+                {
+                    DeviceData.Set("VerifiDt", prop.VerifiDt.ToOADate(), verifiStat);
+                }
+
+                if (!monthEv || !halfEv)
+                {
+                    DateTime dt = prop.VerifiDt;
+                    bool fisrt = false;
+                    bool second = false;
+
+                    if (dt != DateTime.MinValue && dt > DateTime.UtcNow)
+                    {
+                        int even = 0;
+
+                        ts = dt - DateTime.UtcNow;
+
+                        int ostatok = ts.Days;
+                        if (ts.Days < 5 || ts.Days > 20)
+                        {
+                            ostatok = ts.Days % 10;
+                        }
+
+                        if (!monthEv && ts.Days < fday && ts.Days > sday) // !monthEv && ts.Days < 31 && ts.Days > 14
+                        {
+                            verifiStat = even = 22; // Оранжевый цвет события
+                            fisrt = true;
+                            monthEv = true;
+                        }
+                        else if (!halfEv && ts.Days <= sday) // 14
+                        {
+                            verifiStat = even = 23; // Красный цвет события
+                            second = true;
+                            halfEv = true;
+                        }
+
+                        if (fisrt || second)
+                        {
+                            dtold = DateTime.UtcNow;
+                            // генерация события
+                            DeviceEvent verifi = new DeviceEvent(DeviceTags["VerifiDt"]);
+
+                            verifi.Descr = $"{ToDaysStr(ostatok, ts.Days)}";   // в логе Коммуникатора
+                            verifi.Text = $"{ToDaysStr(ostatok, ts.Days)}";
+
+                            verifi.Ack = false;
+                            verifi.TextFormat = EventTextFormat.CustomText;
+                            verifi.Timestamp = DateTime.UtcNow;
+                            verifi.CnlStat = even;
+
+                            DeviceData.EnqueueEvent(verifi);
+                            Log.WriteWarning(verifi.Text);
+                        }
+                    }
+                }
+                #region Enable Days Events
+                if (re)
+                {
+                    DateTime dtts = DateTime.UtcNow;
+                    if (monthEv || halfEv)
+                    {
+                        TimeSpan tsn = dtts - dtold;
+                        if (tsn.Days > 0 && monthEv && ts.Days < fday && ts.Days > sday) // tsn.Days > 0 && monthEv && ts.Days < 31 && ts.Days > 14
+                        {
+                            monthEv = false;
+                        }
+                        if (tsn.Days > 0 && halfEv && ts.Days <= sday) // 14
+                        {
+                            halfEv = false;
+                        }
+                    }
+                }
+                #endregion Enable Days Events
+                #endregion Test Data Verification
             }
 
             LineContext.SharedData[address] = prop; // записать данные в общие свойства
@@ -1307,67 +1487,97 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                         byte[] bindata = new byte[cmd.CmdData.Length];
                         bindata = cmd.CmdData;
 
-                        DeviceEvent status = new DeviceEvent(DeviceTags["error"]);
-                        int even = 21; // Зеленый цвет события GOOD
-
-                        if (bindata.Length == channels[cmdCode].datalen)
+                        if (cmd.CmdCode.ToLower() == "verifidt")
                         {
-                            // Индекс начала блока данных в запросе
-                            int startbindat = channels[cmdCode].setCommand.Length - bindata.Length - 2;
-                            byte[] DataBin = new byte[channels[cmdCode].setCommand.Length];
-                            Array.Copy(channels[cmdCode].setCommand, 0, DataBin, 0, startbindat);
-                            Array.Copy(cmd.CmdData, 0, DataBin, startbindat, cmd.CmdData.Length);
-                            ushort res = CrcFunc.CalcCRC16(DataBin, DataBin.Length - 2);
-                            DataBin[DataBin.Length - 2] = (byte)(res % 256);                // добавить контрольную сумму к буферу посылки
-                            DataBin[DataBin.Length - 1] = (byte)(res / 256);
+                            prop.VerifiDt = new DateTime();
 
-                            Request(DataBin, channels[cmdCode].scCnt, string.Format(Locale.IsRussian ? "Отправка команды {0}" : "Sending a command {0}", channels[cmdCode].Name));
+                            string vdt = Encoding.Default.GetString(cmd.CmdData);
+                            bool checkDt = DateTime.TryParse(vdt, out prop.VerifiDt);
 
-                            if (LastRequestOK && ToLogString(code) == "")
+                            if (checkDt)
                             {
                                 string message = string.Format(Locale.IsRussian ?
-                                    "OK Команда {0} выполнена успешно" :
-                                    "OK Command {0} completed successfully", channels[cmdCode].Name);
+                                    "OK Команда {0} выполнена успешно, дата поверки {1}" :
+                                    "OK Command {0} completed successfully, verification date {1}", channels[cmdCode].Name, prop.VerifiDt.ToString("d")); // TEST "dd.MM.yyyy"
                                 Log.WriteLine(message);
 
-                                status.Descr = message; // в логе Коммуникатора
-                                status.Text = message;
+                                verifiStat = 1;
+                                LastRequestOK = true;
+                                LineContext.SharedData[address] = prop;
+                                prop.saveParam.verifiDt = prop.VerifiDt.ToString("d"); // TEST "dd.MM.yyyy"
+                                SaveSettings();
                             }
                             else
                             {
                                 string message = string.Format(Locale.IsRussian ?
-                                    "Ошибка Команда {0} не выполнена, {1}" :
-                                    "Error Command {0} not executed, {1}", channels[cmdCode].Name, ToLogString(code));
+                                    "Ошибка: Команда {0} не выполнена, некорректная дата" :
+                                    "Error: Command {0} not executed, incorrect date", channels[cmdCode].Name);
                                 Log.WriteLine(message);
-                                even = 23;    // Красный цвет события
-                                status.Descr = message;  // в логе Коммуникатора
-                                status.Text = message;
-                                LastRequestOK = false; // При ошибке на команду для расчета ????????? TEST TEST
                             }
                         }
                         else
                         {
-                            string message = string.Format(Locale.IsRussian ?
-                                "Ошибка длина блока данных должен быть равна {0}" :
-                                "Error the length of the data block must be equal to = {0}", channels[cmdCode].datalen);
-                            Log.WriteLine(message);
-                            even = 23;    // Красный цвет события
-                            status.Descr = message;  // в логе Коммуникатора
-                            status.Text = message;
+                            DeviceEvent status = new DeviceEvent(DeviceTags["error"]);
+                            int even = 21; // Зеленый цвет события GOOD
+
+                            if (bindata.Length == channels[cmdCode].datalen)
+                            {
+                                // Индекс начала блока данных в запросе
+                                int startbindat = channels[cmdCode].setCommand.Length - bindata.Length - 2;
+                                byte[] DataBin = new byte[channels[cmdCode].setCommand.Length];
+                                Array.Copy(channels[cmdCode].setCommand, 0, DataBin, 0, startbindat);
+                                Array.Copy(cmd.CmdData, 0, DataBin, startbindat, cmd.CmdData.Length);
+                                ushort res = CrcFunc.CalcCRC16(DataBin, DataBin.Length - 2);
+                                DataBin[DataBin.Length - 2] = (byte)(res % 256);                // добавить контрольную сумму к буферу посылки
+                                DataBin[DataBin.Length - 1] = (byte)(res / 256);
+
+                                Request(DataBin, channels[cmdCode].scCnt, string.Format(Locale.IsRussian ? "Отправка команды {0}" : "Sending a command {0}", channels[cmdCode].Name));
+
+                                if (LastRequestOK && ToLogString(code) == "")
+                                {
+                                    string message = string.Format(Locale.IsRussian ?
+                                        "OK Команда {0} выполнена успешно" :
+                                        "OK Command {0} completed successfully", channels[cmdCode].Name);
+                                    Log.WriteLine(message);
+
+                                    status.Descr = message; // в логе Коммуникатора
+                                    status.Text = message;
+                                }
+                                else
+                                {
+                                    string message = string.Format(Locale.IsRussian ?
+                                        "Ошибка: Команда {0} не выполнена, {1}" :
+                                        "Error: Command {0} not executed, {1}", channels[cmdCode].Name, ToLogString(code));
+                                    Log.WriteLine(message);
+                                    even = 23;    // Красный цвет события
+                                    status.Descr = message;  // в логе Коммуникатора
+                                    status.Text = message;
+                                }
+                            }
+                            else
+                            {
+                                string message = string.Format(Locale.IsRussian ?
+                                    "Ошибка: длина блока данных должна быть равна {0}" :
+                                    "Error: the length of the data block must be equal to = {0}", channels[cmdCode].datalen);
+                                Log.WriteLine(message);
+                                even = 23;    // Красный цвет события
+                                status.Descr = message;  // в логе Коммуникатора
+                                status.Text = message;
+                            }
+
+                            status.Ack = false;
+                            status.TextFormat = EventTextFormat.CustomText; // EventTextFormat.CustomText
+                            status.Timestamp = DateTime.UtcNow;
+                            status.CnlStat = even;
+                            status.CnlVal = code;
+
+                            DeviceData.EnqueueEvent(status);
                         }
-
-                        status.Ack = false;
-                        status.TextFormat = EventTextFormat.CustomText; // EventTextFormat.CustomText
-                        status.Timestamp = DateTime.UtcNow;
-                        status.CnlStat = even;
-                        status.CnlVal = code;
-
-                        DeviceData.EnqueueEvent(status);
                     }
                 }
             }
 
-            if (Level != "2" && channels[cmdCode].Mode == 2 || Level.ToLower() != "admin" && channels[cmdCode].Mode == 2)
+            if ((Level != "2" || Level.ToLower() != "admin") && channels[cmdCode].Mode == 2 )
             {
                 // После выполнения команды Администратором закрываем канал
                 // в следующей сессии канал откроется с заданным уровнем доступа
@@ -1380,9 +1590,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             }
             FinishCommand();
         }
-
         #endregion SendCommand
 
+        #region Requests
         private class Requests
         {
             public byte[] testCnlReq;   // запрос тестирования канала
@@ -1404,7 +1614,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             {
             }
         }
+        #endregion Requests
 
+        #region TagCreate
         private void tagcreate(string nameMenu, int bit)
         {
             int idgr = devTemplate.SndGroups.FindIndex(f => f.Bit == bit); // Ищем индекс с соответствующим битом группы
@@ -1416,22 +1628,35 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             {
                 if (devTemplate.SndGroups[idgr].value[i].active) // Сохраняем только активные сигналы
                 {
-                    channels.Add(devTemplate.SndGroups[idgr].value[i].code,
+                    int cnlType = CnlTypeID.Input;
+                    //string nCode = string.IsNullOrEmpty(devTemplate.SndGroups[idgr].value[i].code) ? forEmpty.ToString() : devTemplate.SndGroups[idgr].value[i].code;
+
+                    if (string.IsNullOrEmpty(devTemplate.SndGroups[idgr].value[i].code))
+                    {
+                        nCode = $"tag_{forEmpty}";
+                        forEmpty++; // Для переменных с пустым кодом тега
+                    }
+                    else nCode = devTemplate.SndGroups[idgr].value[i].code;
+
+                    channels.Add(nCode,
                         new CnlPrototypeFactory.ActiveChannel()
                         {
                             GroupName = nameMenu,
                             Name = $"{devTemplate.SndGroups[idgr].Name} {devTemplate.SndGroups[idgr].value[i].name}", // Полное имя параметра Имя группы + Имя тега
-                            Code = devTemplate.SndGroups[idgr].value[i].code,
+                            Code = nCode, // devTemplate.SndGroups[idgr].value[i].code, // Test
                             Mode = 1,
-                            CnlType = CnlTypeID.Input,
+                            CnlType = cnlType,
                             range = string.IsNullOrEmpty(devTemplate.SndGroups[idgr].value[i].multiplier) ? "1" : devTemplate.SndGroups[idgr].value[i].multiplier,
                             idxPar = i,
                             quantity = quantity // В каждой переменной группы указываем quantity хотя достаточно для первой
                         });
+                    //forEmpty++;
                 }
             }
         }
+        #endregion TagCreate
 
+        #region String To Double
         private double SToDouble(string s)
         {
             double result = 1;
@@ -1444,14 +1669,29 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
             }
             return result;
         }
+        #endregion String To Double
 
+        #region OnCommLineTerminate
+        /// <summary>
+        /// Выполнить действия при завершении работы линии связи
+        /// </summary>
+        public override void OnCommLineTerminate()
+        {
+            // если все срезы переданы и загрузка настроек выполнена, сохранить время запроса архивов в файле
+            if (profile.Count > 0)
+                SaveSettings();
+        }
+        #endregion OnCommLineTerminate
+
+        #region LoadSettings
         /// <summary>
         /// Загрузить из файла даты последнего архива и время запроса архивов
         /// </summary>
         private void LoadSettings()
         {
             MyDevice prop = (MyDevice)LineContext.SharedData[address];
-            string fname = $"{AppDirs.StorageDir}Mercury23x_L{LineContext.CommLineNum:D3}_A{NumAddress:D3}.xml";
+            //string fname = $"{AppDirs.StorageDir}Mercury23x_L{LineContext.CommLineNum:D3}_A{NumAddress:D3}.xml";
+            string fname = $"{AppDirs.StorageDir}{devTemplate.Name}_L{lineNum}_D{devNum}_A{addrNum}.xml";
 
             try
             {
@@ -1465,17 +1705,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 "No settings file found: " + err.Message));
             }
         }
+        #endregion LoadSettings
 
-        /// <summary>
-        /// Выполнить действия при завершении работы линии связи
-        /// </summary>
-        public override void OnCommLineTerminate()
-        {
-            // если все срезы переданы и загрузка настроек выполнена, сохранить время запроса архивов в файле
-            if (profile.Count > 0)
-                SaveSettings();
-        }
-
+        #region SaveSettings
         /// <summary>
         /// Сохранить в файле время запроса последнего архивов
         /// </summary>
@@ -1484,7 +1716,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
 
             MyDevice prop = (MyDevice)LineContext.SharedData[address];
             // Номер линии связи, Number - Номер Устройства, Address - Адрес прибора
-            string fname = $"{AppDirs.StorageDir}Mercury23x_L{LineContext.CommLineNum:D3}_A{NumAddress:D3}.xml";
+            //string fname = $"{AppDirs.StorageDir}Mercury23x_L{LineContext.CommLineNum:D3}_A{NumAddress:D3}.xml";
+            string fname = $"{AppDirs.StorageDir}{devTemplate.Name}_L{lineNum}_D{devNum}_A{addrNum}.xml";
+
             try
             {
                 FileFunc.SaveXml(prop.saveParam, fname);
@@ -1496,7 +1730,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 "Error when saving settings in a file: " + err.Message));
             }
         }
+        #endregion SaveSettings
 
+        #region Request
         private void Request(byte[] request, int Cnt, string descr = null)
         {
             int tryNum = 0;
@@ -1515,16 +1751,19 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
 
                     checkCRC(Cnt);
 
-                    if (!LastRequestOK)
-                    {
-                        Thread.Sleep(PollingOptions.Delay);
-                    }
                     FinishRequest();
                     tryNum++;
+
+                    //if (!LastRequestOK)
+                    //{
+                    //    Thread.Sleep(PollingOptions.Delay);
+                    //}
                 }
             }
         }
+        #endregion Request
 
+        #region Read from port
         /// <summary>
         /// Считать ответ из последовательного порта
         /// </summary>
@@ -1532,8 +1771,9 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         {
             read_cnt = Connection.Read(buffer, 0, count, PollingOptions.Timeout, ProtocolFormat.Hex, out logText);
         }
+        #endregion Read from port
 
-
+        #region WriteRequest
         /// <summary>
         /// Отправить запрос и сделать запись в журнал
         /// </summary>
@@ -1548,9 +1788,12 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
         {
             Connection.Write(request, 0, request.Length, ProtocolFormat.Hex, out logText);
         }
+        #endregion WriteRequest
 
+        #region Проверка CRC
         private void checkCRC(int count)
         {
+
             if (read_cnt >= 4)
             {
                 ushort crc = CrcFunc.CalcCRC16(inBuf, read_cnt);
@@ -1583,6 +1826,7 @@ namespace Scada.Comm.Drivers.DrvMercury23x.Logic
                 Log.WriteLine(CommPhrases.ResponseError);
             }
         }
+        #endregion Проверка CRC
 
     }
 }
