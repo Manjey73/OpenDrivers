@@ -231,6 +231,7 @@ namespace Scada.Comm.Drivers.DrvRodosBu.Logic
                 }
                 else
                 {
+                    DeviceData.Invalidate();
                     Log.WriteLine(logText);
                 }
             }
