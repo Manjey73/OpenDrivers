@@ -318,6 +318,7 @@ namespace Scada.Comm.Drivers.DrvRodosBu.Logic
         /// </summary>
         public override void OnCommLineTerminate()
         {
+            DeviceData.Invalidate();
             httpClient?.Dispose();
         }
         #endregion CommLineTerninate
